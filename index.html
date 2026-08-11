@@ -222,9 +222,53 @@ textarea { min-height: 96px; line-height: 1.55; }
 .bible-section .v.empty { color: var(--ink-soft); font-style: italic; opacity: .6; }
 
 .rules-list { list-style: none; padding: 0; margin: .4rem 0 0; }
-.rules-list li { font-size: .84rem; padding: .4rem .6rem; background: var(--bg-2); border: 1px solid var(--line);
-  border-radius: 8px; margin-bottom: .35rem; display: flex; gap: .5rem; align-items: flex-start; }
-.rules-list li .x { margin-left: auto; cursor: pointer; color: var(--accent-2); }
+.rules-list li { font-size: .84rem; padding: .5rem .6rem; background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 8px; margin-bottom: .4rem; }
+.rule-row { display: flex; gap: .5rem; align-items: flex-start; }
+.rule-row .x { margin-left: auto; cursor: pointer; color: var(--accent-2); }
+.rule-cfg { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem; margin-top: .4rem; }
+.rule-cfg input { font-size: .68rem; padding: .35rem .4rem; }
+.rule-cfg input::placeholder { font-size: .62rem; letter-spacing: .02em; }
+
+/* section header with an inline add-affordance */
+.k .add { float: right; cursor: pointer; color: var(--ink-soft); font-size: .66rem; letter-spacing: .1em;
+  border: 1px solid var(--line); border-radius: 6px; padding: .1rem .4rem; transition: all .2s; text-transform: none; }
+.k .add:hover { color: var(--ink); border-color: var(--accent); }
+
+/* Canon Ledger */
+.entity { background: var(--bg-2); border: 1px solid var(--line); border-radius: 9px; padding: .5rem .55rem; margin: .4rem 0; }
+.entity-head { display: flex; align-items: center; gap: .4rem; }
+.entity-head .ename { border: none; background: transparent; font-weight: 700; font-size: .86rem; padding: .1rem; color: var(--ink); }
+.entity-head .etype { font-size: .6rem; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 5px;
+  padding: .1rem .3rem; cursor: pointer; text-transform: uppercase; letter-spacing: .08em; }
+.entity-head .x { margin-left: auto; cursor: pointer; color: var(--accent-2); font-size: .8rem; }
+.facts { list-style: none; padding: 0; margin: .35rem 0 .3rem; }
+.facts li { font-size: .78rem; color: var(--ink); padding: .2rem .35rem; display: flex; gap: .4rem; align-items: center;
+  border-left: 2px solid var(--accent); margin-bottom: .2rem; background: var(--panel); border-radius: 0 5px 5px 0; }
+.facts li .fx-x { margin-left: auto; cursor: pointer; color: var(--ink-soft); font-size: .7rem; }
+.fact-add { font-size: .72rem; padding: .35rem .45rem; }
+.canon-empty { font-size: .74rem; color: var(--ink-soft); font-style: italic; opacity: .6; }
+
+/* Contradiction Log (on the Desk) */
+.contra-head { display: flex; align-items: center; gap: .6rem; margin: 1.4rem 0 .6rem; }
+.contra-head h3 { font-family: var(--font-head); font-weight: 400; margin: 0; font-size: 1.1rem; }
+.contra-badge { font-size: .72rem; padding: .15rem .55rem; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft); }
+.contra-badge.clean { color: #4ade80; border-color: #2c5a3a; }
+.contra-badge.dirty { color: var(--accent-2); border-color: var(--accent-2); }
+.contra-card { border: 1px solid var(--line); border-left: 3px solid var(--accent-2); background: var(--panel);
+  border-radius: 9px; padding: .7rem .85rem; margin-bottom: .5rem; animation: rise .4s; }
+.contra-card.soft { border-left-color: var(--accent); }
+.contra-card.accepted { border-left-color: #4ade80; opacity: .7; }
+.contra-card .cmsg { font-size: .88rem; line-height: 1.45; }
+.contra-card .cmeta { display: flex; gap: .5rem; align-items: center; margin-top: .5rem; }
+.contra-sev { font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; padding: .1rem .45rem;
+  border-radius: 5px; border: 1px solid var(--line); color: var(--ink-soft); }
+.contra-card .cbtns { margin-left: auto; display: flex; gap: .4rem; }
+.contra-card .cbtn { font-size: .7rem; padding: .25rem .6rem; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: var(--ink-soft); transition: all .2s; }
+.contra-card .cbtn:hover { color: var(--ink); border-color: var(--accent); }
+.contra-card .cbtn.designed:hover { border-color: #4ade80; color: #4ade80; }
+.contra-none { font-size: .84rem; color: var(--ink-soft); padding: .6rem 0; }
 
 /* AI assist panel */
 .assist { margin-top: 1rem; border: 1px dashed var(--line); border-radius: 10px; padding: .8rem; }
@@ -334,11 +378,19 @@ textarea { min-height: 96px; line-height: 1.55; }
       <div class="desk-wrap">
         <textarea id="manuscript" placeholder="Begin the scene. Let the reader feel the reality breaking — but never break your own rules by accident…"></textarea>
       </div>
-      <div style="display:flex;gap:.6rem;margin-top:1rem">
-        <button class="btn ghost" id="check3">Audit Coherence</button>
-        <button class="btn" id="save3">Save Passage →</button>
+      <div style="display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap">
+        <button class="btn" id="check3">🧩 Keep the Rules — Scan Passage</button>
+        <button class="btn ghost" id="deep3" title="Uses your Muse key for a real read">✦ Deep Scan (Muse)</button>
+        <button class="btn ghost" id="save3">Save Passage →</button>
       </div>
-      <div id="audit-out" class="assist out" style="margin-top:1rem"></div>
+
+      <div class="contra-head">
+        <h3>Contradiction Log</h3>
+        <span class="contra-badge" id="contra-badge">not scanned</span>
+      </div>
+      <p class="muted" id="contra-hint">Vyasa checks this passage against your Canon facts, rules of the anomaly, and paradox. Hard breaks are accidents to fix; you can mark any flag <em>By Design</em> — that's the reveal, not a mistake.</p>
+      <div id="contra-log"></div>
+      <div id="audit-out" class="assist out" style="margin-top:.6rem"></div>
     </section>
 
     <!-- PHASE 4 — LAUNCH -->
@@ -368,7 +420,7 @@ textarea { min-height: 96px; line-height: 1.55; }
     <h3 id="bible-title">The Story Bible</h3>
 
     <div class="meter">
-      <div class="lab"><span>COHERENCE</span><span id="coh-pct">—</span></div>
+      <div class="lab"><span>CANON INTEGRITY</span><span id="coh-pct">—</span></div>
       <div class="track"><div class="fill" id="coh-fill"></div></div>
       <div class="muted" id="coh-note">Anchor a paradox to begin measuring.</div>
     </div>
@@ -388,8 +440,15 @@ textarea { min-height: 96px; line-height: 1.55; }
     <div class="bible-section">
       <div class="k">Rules of the Anomaly</div>
       <ul class="rules-list" id="b-rules"></ul>
-      <input type="text" id="rule-input" placeholder="+ add a rule (its limits & triggers)" style="margin-top:.4rem;font-size:.8rem" />
+      <input type="text" id="rule-input" placeholder="+ add a rule, then set its trigger & limit" style="margin-top:.4rem;font-size:.8rem" />
     </div>
+
+    <!-- CANON LEDGER — entity + fact tracking (the external memory) -->
+    <div class="bible-section">
+      <div class="k">Canon Ledger <span class="add" id="add-entity">+ entity</span></div>
+      <div id="b-canon"></div>
+    </div>
+
     <div class="bible-section">
       <div class="k">Beats Mapped</div>
       <div class="v" id="b-beats">0</div>
@@ -433,19 +492,40 @@ const $  = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 const LS_KEY = "vyasa.bible.v1";
 
-/* ---- The Story Bible: single source of truth ---- */
+/* ---- The Story Bible: single source of truth ----
+   rules:  [{ id, text, trigger, limit }]   — active constraints, not sticky notes
+   canon:  [{ id, name, type, facts:[{id,text}] }]  — the external memory
+   contradictions: [{ id, sig, msg, severity, status }]  — the alarm log
+*/
 const defaultBible = () => ({
   genre: "void", title: "", paradox: "", theme: "",
-  unreliable: [], rules: [], beats: [], manuscript: "",
+  unreliable: [], rules: [], canon: [], contradictions: [],
+  beats: [], manuscript: "",
   blurb: "", cover: "", keywords: "", coherence: 0,
 });
 let bible = load();
 
 function load() {
-  try { const r = JSON.parse(localStorage.getItem(LS_KEY)); return r ? {...defaultBible(), ...r} : defaultBible(); }
-  catch { return defaultBible(); }
+  try {
+    const r = JSON.parse(localStorage.getItem(LS_KEY));
+    if (!r) return defaultBible();
+    const b = { ...defaultBible(), ...r };
+    return migrate(b);
+  } catch { return defaultBible(); }
+}
+/* Migrate older saved bibles forward so nobody loses work when the schema grows. */
+function migrate(b) {
+  // v1 rules were plain strings; upgrade to {id,text,trigger,limit} objects.
+  b.rules = (b.rules || []).map(r =>
+    typeof r === "string" ? { id: uid(), text: r, trigger: "", limit: "" } : { trigger: "", limit: "", ...r }
+  );
+  b.canon = b.canon || [];
+  b.contradictions = b.contradictions || [];
+  return b;
 }
 function save() { localStorage.setItem(LS_KEY, JSON.stringify(bible)); }
+let _idc = 0;
+function uid() { return "id" + (Date.now().toString(36)) + (_idc++).toString(36); }
 
 /* ---- Genre voice: how Vyasa speaks per world (flavor text) ---- */
 const GENRE_VOICE = {
@@ -551,39 +631,185 @@ $("#save2").addEventListener("click", () => { toast("Blueprint locked. Revelatio
 
 /* ===================== PHASE 3 — THE DESK ===================== */
 $("#manuscript").addEventListener("input", e => { bible.manuscript = e.target.value; save(); recompute(); });
-$("#check3").addEventListener("click", auditCoherence);
+$("#check3").addEventListener("click", () => scanPassage(false));
+$("#deep3").addEventListener("click", () => scanPassage(true));
 $("#save3").addEventListener("click", () => { toast("Passage saved to the Bible."); });
 
-/* The Coherence engine — the heart of the "designed absurdity" promise.
-   Heuristic, local, explainable. (The Muse can deepen this with a real model.) */
-function auditCoherence() {
-  const text = bible.manuscript.toLowerCase();
-  const notes = [];
-  if (!text.trim()) { $("#audit-out").textContent = "Write a passage first — the desk needs prose to audit."; return; }
+/* ============================================================================
+   THE SPINE — "Vyasa keeps the rules so your reader gets lost, and you never do."
+   scanPassage() runs the deterministic Canon/Rule/Paradox checks. If deep=true
+   and a Muse key is present, it ALSO asks a real model to find contradictions
+   the heuristics can't see, and merges them into the same log.
+   ============================================================================ */
+async function scanPassage(deep) {
+  const raw = bible.manuscript || "";
+  if (!raw.trim()) { $("#audit-out").textContent = "Write a passage first — the desk needs prose to scan."; return; }
 
-  // 1. Does the prose echo the paradox's key nouns?
-  const anchorWords = keyWords(bible.paradox);
-  const hits = anchorWords.filter(w => text.includes(w));
-  notes.push(`◈ Paradox resonance: ${hits.length}/${anchorWords.length} anchor concepts surfaced${hits.length?` (${hits.join(", ")})`:""}.`);
+  // 1) Deterministic pass — always runs, works offline.
+  const found = detectContradictions(raw);
 
-  // 2. Are the declared rules respected / referenced?
-  if (bible.rules.length) {
-    bible.rules.forEach(r => {
-      const rw = keyWords(r);
-      const touched = rw.some(w => text.includes(w));
-      notes.push(`${touched ? "✓" : "⚠"} Rule "${truncate(r,42)}" ${touched ? "is in play" : "is not reflected here"}.`);
-    });
-  } else {
-    notes.push("⚠ No rules declared yet — add rules of the anomaly (right panel) so coherence is measurable, not vibes.");
+  // 2) Preserve prior human verdicts (accepted / dismissed) across re-scans,
+  //    keyed by a stable signature so the same issue keeps its decision.
+  const prior = new Map(bible.contradictions.map(c => [c.sig, c]));
+  let merged = found.map(f => {
+    const p = prior.get(f.sig);
+    return p ? { ...f, id: p.id, status: p.status } : { ...f, id: uid(), status: "open" };
+  });
+
+  bible.contradictions = merged; save(); renderContradictions(); recompute();
+  $("#audit-out").textContent = craftNotes(raw);
+
+  // 3) Optional deep pass via the Muse (real model reading).
+  if (deep) {
+    const key = ($("#ai-key").value || "").trim();
+    if (!key) { toast("Deep Scan needs your Muse key (right panel)."); return; }
+    $("#contra-hint").textContent = "✦ The Muse is reading your passage against the canon…";
+    try {
+      const extra = await museContradictions(raw);
+      const priorNow = new Map(bible.contradictions.map(c => [c.sig, c]));
+      extra.forEach(e => {
+        if (!priorNow.has(e.sig)) {
+          bible.contradictions.push({ id: uid(), status: "open", source: "muse", ...e });
+        }
+      });
+      save(); renderContradictions(); recompute();
+      $("#contra-hint").textContent = "✦ Deep scan complete — Muse findings are marked ✦.";
+    } catch (err) {
+      $("#contra-hint").textContent = "⚠ Deep scan failed: " + err.message;
+    }
   }
+}
 
-  // 3. Sensory disorientation present? (Phase 3 craft check)
-  const senses = ["smell","taste","sound","cold","warm","light","dark","echo","silence","touch"];
-  const senseHits = senses.filter(s => text.includes(s)).length;
-  notes.push(`◈ Sensory grounding: ${senseHits} sense-anchors — ${senseHits>=3?"immersive":"consider more to make the break *felt*"}.`);
+/* ---- Deterministic contradiction detector ----
+   Three sources of truth to violate: Canon facts, Rule triggers/limits, Paradox.
+   Every finding gets a STABLE signature so human verdicts survive re-scans. */
+function detectContradictions(text) {
+  const lower = text.toLowerCase();
+  const sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
+  const out = [];
 
-  $("#audit-out").textContent = notes.join("\n");
-  recompute();
+  // Antonym/state pairs — the backbone of "you said X, now you wrote not-X".
+  const OPP = [
+    ["left-handed","right-handed"], ["left hand","right hand"],
+    ["left-handed","right hand"], ["right-handed","left hand"],
+    ["alive","dead"], ["living","dead"], ["awake","asleep"],
+    ["blue eyes","brown eyes"], ["blue eyes","green eyes"], ["brown eyes","green eyes"],
+    ["day","night"], ["silent","loud"], ["young","old"],
+    ["male","female"], ["tall","short"], ["light","dark"],
+    ["remembers","forgets"], ["true","false"], ["real","imagined"],
+  ];
+
+  // (A) CANON FACT violations: a tracked fact asserts one pole; the prose asserts the other.
+  bible.canon.forEach(ent => {
+    const nameHit = ent.name && lower.includes(ent.name.toLowerCase());
+    (ent.facts || []).forEach(fact => {
+      const fl = (fact.text || "").toLowerCase();
+      OPP.forEach(([a, b]) => {
+        const factHasA = fl.includes(a), factHasB = fl.includes(b);
+        if (!factHasA && !factHasB) return;
+        const proseHasA = lower.includes(a), proseHasB = lower.includes(b);
+        const clash = (factHasA && proseHasB) || (factHasB && proseHasA);
+        if (clash) {
+          const proseSide = factHasA ? b : a;
+          out.push({
+            sig: `canon:${ent.id}:${a}|${b}`,
+            severity: "hard",
+            source: "canon",
+            msg: `Canon says ${ent.name || "an entity"} is “${fl.includes(a)?a:b}”, but this passage writes “${proseSide}.”`,
+            where: firstSentenceWith(sentences, proseSide),
+          });
+        }
+      });
+    });
+  });
+
+  // (B) RULE LIMIT violations: the rule's TRIGGER concept appears, but the prose
+  //     also contains a phrase that breaches the stated LIMIT.
+  bible.rules.forEach(rule => {
+    if (!rule.trigger && !rule.limit) return;
+    const trig = keyList(rule.trigger);
+    const lim  = keyList(rule.limit);
+    const triggered = trig.length && trig.some(w => lower.includes(w));
+    // naive breach: prose negates the limit ("never/only/cannot" + limit word nearby)
+    const breachWords = ["never","cannot","can't","only","impossible","without","no longer","forbidden"];
+    const limitTouched = lim.length && lim.some(w => lower.includes(w));
+    if (triggered && limitTouched) {
+      const negatedNearLimit = breachWords.some(bw => {
+        const i = lower.indexOf(bw);
+        return i >= 0 && lim.some(w => Math.abs(lower.indexOf(w) - i) < 80);
+      });
+      // If the limit is stated as an absolute ("only at death") and the prose shows
+      // the triggered event WITHOUT the limiting condition, flag it as soft.
+      out.push({
+        sig: `rule:${rule.id}`,
+        severity: negatedNearLimit ? "soft" : "soft",
+        source: "rule",
+        msg: `Rule in play: “${truncate(rule.text,60)}.” Its trigger appears here — confirm the limit (“${truncate(rule.limit||"—",40)}”) still holds.`,
+        where: firstSentenceWith(sentences, trig[0] || ""),
+      });
+    }
+  });
+
+  // (C) Internal antonym clash WITHIN the passage (same subject, opposite states).
+  OPP.forEach(([a, b]) => {
+    if (lower.includes(a) && lower.includes(b)) {
+      // Only flag if reasonably close — likely the same referent, not two people.
+      const ia = lower.indexOf(a), ib = lower.indexOf(b);
+      if (Math.abs(ia - ib) < 220) {
+        out.push({
+          sig: `inline:${a}|${b}`,
+          severity: "soft",
+          source: "prose",
+          msg: `This passage holds both “${a}” and “${b}” close together — intentional paradox, or a slip?`,
+          where: firstSentenceWith(sentences, a),
+        });
+      }
+    }
+  });
+
+  return out;
+}
+
+function craftNotes(text) {
+  const lower = text.toLowerCase();
+  const notes = [];
+  const anchorWords = keyWords(bible.paradox);
+  const hits = anchorWords.filter(w => lower.includes(w));
+  notes.push(`◈ Paradox resonance: ${hits.length}/${anchorWords.length} anchor concepts present${hits.length?` (${hits.join(", ")})`:""}.`);
+  const senses = ["smell","taste","sound","cold","warm","light","dark","echo","silence","touch","scent","hum"];
+  const senseHits = senses.filter(s => lower.includes(s)).length;
+  notes.push(`◈ Sensory grounding: ${senseHits} sense-anchors — ${senseHits>=3?"immersive":"add more to make the break *felt*"}.`);
+  return notes.join("\n");
+}
+
+/* Ask the Muse to find contradictions the heuristics miss. Returns [{sig,msg,severity,where}]. */
+async function museContradictions(text) {
+  const canonStr = bible.canon.map(e =>
+    `${e.name} (${e.type}): ${(e.facts||[]).map(f=>f.text).join("; ")||"—"}`).join("\n") || "(none)";
+  const rulesStr = bible.rules.map(r =>
+    `- ${r.text}${r.trigger?` [trigger: ${r.trigger}]`:""}${r.limit?` [limit: ${r.limit}]`:""}`).join("\n") || "(none)";
+  const prompt =
+`You are Vyasa's Continuity Keeper. Find places where this PASSAGE contradicts the story's established CANON, RULES, or PARADOX. Only report genuine inconsistencies a reader could catch — not style. Return STRICT JSON: {"issues":[{"quote":"<short exact phrase from passage>","problem":"<one sentence>","severity":"hard|soft"}]}. If none, return {"issues":[]}.
+
+PARADOX: ${bible.paradox||"(none)"}
+CANON:
+${canonStr}
+RULES:
+${rulesStr}
+
+PASSAGE:
+"""${text.slice(0, 6000)}"""`;
+  const provider = $("#ai-provider").value;
+  const key = $("#ai-key").value.trim();
+  const resp = await callProvider(provider, key, prompt);
+  const json = extractJson(resp);
+  const issues = (json && json.issues) || [];
+  return issues.map(it => ({
+    sig: "muse:" + hashStr((it.quote||"") + (it.problem||"")),
+    severity: it.severity === "hard" ? "hard" : "soft",
+    msg: `${it.problem||"Possible contradiction."}${it.quote?`  — “${truncate(it.quote,60)}”`:""}`,
+    where: it.quote || "",
+  }));
 }
 
 /* ===================== PHASE 4 — LAUNCH ===================== */
@@ -595,27 +821,34 @@ $("#save4").addEventListener("click", () => { toast("Labyrinth sealed. Export yo
 /* ===================== RULES OF THE ANOMALY ===================== */
 $("#rule-input").addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.value.trim()) {
-    bible.rules.push(e.target.value.trim()); e.target.value = "";
-    save(); renderBible(); recompute();
+    bible.rules.push({ id: uid(), text: e.target.value.trim(), trigger: "", limit: "" });
+    e.target.value = ""; save(); renderBible(); recompute();
   }
 });
 
-/* ===================== COHERENCE SCORE (holistic) ===================== */
+/* ===================== CANON INTEGRITY SCORE ===================== */
+/* Structure earns points; OPEN contradictions subtract them. This is the number
+   that makes the tagline literal — integrity drops the moment you break a rule. */
 function recompute() {
   let score = 0;
-  if (bible.paradox.trim().length > 20) score += 25;
-  if (bible.theme.trim().length > 10) score += 15;
-  if (bible.unreliable.length) score += 10;
-  if (bible.rules.length) score += Math.min(20, bible.rules.length * 7);
-  if (bible.beats.length >= 3) score += 10;
-  if (bible.beats.some(b => b.reveal !== 0)) score += 5; // non-linear revelation used
-  // prose-vs-rules bonus
-  if (bible.manuscript.trim() && bible.rules.length) {
-    const t = bible.manuscript.toLowerCase();
-    const respected = bible.rules.filter(r => keyWords(r).some(w => t.includes(w))).length;
-    score += Math.min(15, respected * 5);
-  }
-  bible.coherence = Math.min(100, score); save();
+  if (bible.paradox.trim().length > 20) score += 20;
+  if (bible.theme.trim().length > 10) score += 12;
+  if (bible.unreliable.length) score += 8;
+  if (bible.rules.length) score += Math.min(18, bible.rules.length * 6);
+  // rules with an actual trigger+limit are worth more — they're enforceable
+  score += Math.min(12, bible.rules.filter(r => (r.trigger||"").trim() && (r.limit||"").trim()).length * 4);
+  if (bible.canon.length) score += Math.min(12, bible.canon.length * 3);
+  if (bible.beats.length >= 3) score += 8;
+  if (bible.beats.some(b => b.reveal !== 0)) score += 5;
+  if (bible.manuscript.trim()) score += 5;
+
+  // PENALTY: open contradictions erode integrity. Hard breaks hurt most.
+  const open = bible.contradictions.filter(c => c.status === "open");
+  const hard = open.filter(c => c.severity === "hard").length;
+  const soft = open.length - hard;
+  score -= (hard * 14 + soft * 6);
+
+  bible.coherence = Math.max(0, Math.min(100, Math.round(score))); save();
   $("#coh-fill").style.width = bible.coherence + "%";
   $("#coh-pct").textContent = bible.coherence + "%";
 }
@@ -678,17 +911,137 @@ function renderBible() {
   setV("#b-theme", bible.theme, "—");
   setV("#b-unreliable", bible.unreliable.join(" · "), "—");
   $("#b-beats").textContent = bible.beats.length;
-  const rl = $("#b-rules"); rl.innerHTML = "";
-  bible.rules.forEach((r, i) => {
-    const li = document.createElement("li");
-    li.innerHTML = `<span>${escapeHtml(r)}</span><span class="x" data-i="${i}">✕</span>`;
-    rl.appendChild(li);
-  });
-  $$("#b-rules .x").forEach(x => x.addEventListener("click", e => {
-    bible.rules.splice(+e.target.dataset.i, 1); save(); renderBible(); recompute();
-  }));
+  renderRules();
+  renderCanon();
   if (bible.coherence === 0) $("#coh-note").textContent = v.coh;
   else $("#coh-note").textContent = cohNote(bible.coherence);
+}
+
+/* Rules are now active constraints: text + trigger + limit. */
+function renderRules() {
+  const rl = $("#b-rules"); rl.innerHTML = "";
+  bible.rules.forEach(r => {
+    const li = document.createElement("li"); li.dataset.id = r.id;
+    li.innerHTML =
+      `<div class="rule-row"><span>${escapeHtml(r.text)}</span><span class="x" title="remove">✕</span></div>
+       <div class="rule-cfg">
+         <input type="text" class="r-trig" placeholder="TRIGGER — when it applies" value="${escapeHtml(r.trigger||"")}" />
+         <input type="text" class="r-lim" placeholder="LIMIT — what it forbids" value="${escapeHtml(r.limit||"")}" />
+       </div>`;
+    rl.appendChild(li);
+    li.querySelector(".x").addEventListener("click", () => {
+      bible.rules = bible.rules.filter(x => x.id !== r.id); save(); renderBible(); recompute();
+    });
+    li.querySelector(".r-trig").addEventListener("input", e => { r.trigger = e.target.value; save(); });
+    li.querySelector(".r-lim").addEventListener("input", e => { r.limit = e.target.value; save(); });
+  });
+}
+
+/* ===================== CANON LEDGER ===================== */
+const ENTITY_TYPES = ["character","place","object","fact","timeline"];
+$("#add-entity").addEventListener("click", () => {
+  bible.canon.push({ id: uid(), name: "New entity", type: "character", facts: [] });
+  save(); renderCanon();
+});
+function renderCanon() {
+  const box = $("#b-canon"); box.innerHTML = "";
+  if (!bible.canon.length) {
+    box.innerHTML = `<div class="canon-empty">No entities yet. Track a character, place, or fact — Vyasa will guard it against your prose.</div>`;
+    return;
+  }
+  bible.canon.forEach(ent => {
+    const el = document.createElement("div"); el.className = "entity"; el.dataset.id = ent.id;
+    el.innerHTML =
+      `<div class="entity-head">
+         <input class="ename" value="${escapeHtml(ent.name)}" />
+         <span class="etype" title="click to cycle type">${ent.type}</span>
+         <span class="x" title="remove">🗑</span>
+       </div>
+       <ul class="facts"></ul>
+       <input type="text" class="fact-add" placeholder="+ add a fact (e.g. 'left-handed', 'dead in timeline B')" />`;
+    const facts = el.querySelector(".facts");
+    (ent.facts||[]).forEach(f => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${escapeHtml(f.text)}</span><span class="fx-x" title="remove">✕</span>`;
+      li.querySelector(".fx-x").addEventListener("click", () => {
+        ent.facts = ent.facts.filter(x => x.id !== f.id); save(); renderCanon(); rescanIfLogged();
+      });
+      facts.appendChild(li);
+    });
+    el.querySelector(".ename").addEventListener("input", e => { ent.name = e.target.value; save(); });
+    el.querySelector(".etype").addEventListener("click", e => {
+      const i = ENTITY_TYPES.indexOf(ent.type); ent.type = ENTITY_TYPES[(i+1)%ENTITY_TYPES.length];
+      e.target.textContent = ent.type; save();
+    });
+    el.querySelector(".x").addEventListener("click", () => {
+      bible.canon = bible.canon.filter(x => x.id !== ent.id); save(); renderCanon(); rescanIfLogged();
+    });
+    el.querySelector(".fact-add").addEventListener("keydown", e => {
+      if (e.key === "Enter" && e.target.value.trim()) {
+        ent.facts = ent.facts || [];
+        ent.facts.push({ id: uid(), text: e.target.value.trim() });
+        e.target.value = ""; save(); renderCanon(); rescanIfLogged();
+      }
+    });
+    box.appendChild(el);
+  });
+}
+/* If the writer has already scanned, refresh the log when canon changes. */
+function rescanIfLogged() {
+  if (bible.contradictions.length || (bible.manuscript||"").trim()) {
+    const found = detectContradictions(bible.manuscript||"");
+    const prior = new Map(bible.contradictions.map(c => [c.sig, c]));
+    bible.contradictions = found.map(f => {
+      const p = prior.get(f.sig);
+      return p ? { ...f, id: p.id, status: p.status } : { ...f, id: uid(), status: "open" };
+    }).concat(bible.contradictions.filter(c => c.source === "muse")); // keep Muse findings
+    save(); renderContradictions(); recompute();
+  }
+}
+
+/* ===================== CONTRADICTION LOG ===================== */
+function renderContradictions() {
+  const log = $("#contra-log"); if (!log) return;
+  log.innerHTML = "";
+  const live = bible.contradictions.filter(c => c.status !== "dismissed");
+  const open = live.filter(c => c.status === "open");
+  const hard = open.filter(c => c.severity === "hard").length;
+
+  const badge = $("#contra-badge");
+  if (!bible.contradictions.length) { badge.textContent = "not scanned"; badge.className = "contra-badge"; }
+  else if (!open.length) { badge.textContent = "✓ consistent"; badge.className = "contra-badge clean"; }
+  else { badge.textContent = `${open.length} open${hard?` · ${hard} hard`:""}`; badge.className = "contra-badge dirty"; }
+
+  if (!live.length) {
+    if (bible.contradictions.length) log.innerHTML = `<div class="contra-none">✓ No open contradictions. The labyrinth holds — your reader is lost, you are not.</div>`;
+    return;
+  }
+  live.forEach(c => {
+    const card = document.createElement("div");
+    card.className = "contra-card " + (c.severity === "hard" ? "" : "soft") + (c.status === "accepted" ? " accepted" : "");
+    const sev = c.status === "accepted" ? "by design" : (c.severity === "hard" ? "hard break" : "check");
+    card.innerHTML =
+      `<div class="cmsg">${c.source === "muse" ? "✦ " : ""}${escapeHtml(c.msg)}</div>
+       ${c.where ? `<div class="muted" style="margin-top:.35rem">“${escapeHtml(truncate(c.where,110))}”</div>` : ""}
+       <div class="cmeta">
+         <span class="contra-sev">${sev}</span>
+         <div class="cbtns">
+           ${c.status === "accepted"
+              ? `<button class="cbtn" data-act="reopen">Reopen</button>`
+              : `<button class="cbtn designed" data-act="accept" title="This is intentional — the reveal">By Design</button>`}
+           <button class="cbtn" data-act="dismiss">Dismiss</button>
+         </div>
+       </div>`;
+    card.querySelectorAll(".cbtn").forEach(b => b.addEventListener("click", () => {
+      const act = b.dataset.act;
+      const item = bible.contradictions.find(x => x.id === c.id); if (!item) return;
+      if (act === "accept") item.status = "accepted";
+      else if (act === "reopen") item.status = "open";
+      else if (act === "dismiss") item.status = "dismissed";
+      save(); renderContradictions(); recompute();
+    }));
+    log.appendChild(card);
+  });
 }
 function setV(sel, val, empty) {
   const el = $(sel);
@@ -696,8 +1049,10 @@ function setV(sel, val, empty) {
   else { el.textContent = empty; el.classList.add("empty"); }
 }
 function cohNote(c) {
+  const open = bible.contradictions.filter(x => x.status === "open").length;
+  if (open) return `${open} open contradiction${open>1?"s":""} — resolve or mark By Design on the Desk.`;
   if (c < 30) return "Fragile. The illusion has nothing to stand on yet.";
-  if (c < 60) return "Taking shape. Add rules & non-linear reveals to deepen the maze.";
+  if (c < 60) return "Taking shape. Add rules, canon & non-linear reveals to deepen the maze.";
   if (c < 85) return "Structurally sound. The absurdity is becoming designed.";
   return "Airtight labyrinth. The reader will be lost; you are not.";
 }
@@ -724,8 +1079,25 @@ function goChamber(n) { $(`.chamber-btn[data-c="${n}"]`).click(); }
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 2600); }
 function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function truncate(s,n){ return s.length>n ? s.slice(0,n)+"…" : s; }
-function keyWords(s){ return (s.toLowerCase().match(/\b[a-z]{4,}\b/g)||[]).filter(w=>!STOP.has(w)).slice(0,8); }
+function keyWords(s){ return ((s||"").toLowerCase().match(/\b[a-z]{4,}\b/g)||[]).filter(w=>!STOP.has(w)).slice(0,8); }
 const STOP = new Set(["that","this","with","from","they","their","them","what","when","where","which","would","could","about","into","then","than","have","been","were","will","your","yours"]);
+/* keyList — like keyWords but keeps 3+ letter words and no cap; for triggers/limits. */
+function keyList(s){ return ((s||"").toLowerCase().match(/\b[a-z]{3,}\b/g)||[]).filter(w=>!STOP.has(w)); }
+/* firstSentenceWith — return the first sentence containing a phrase, for "where" context. */
+function firstSentenceWith(sentences, phrase){
+  if(!phrase) return "";
+  const p = phrase.toLowerCase();
+  return (sentences.find(s => s.toLowerCase().includes(p)) || "").trim();
+}
+/* extractJson — pull the first {...} block from a model reply and parse it. */
+function extractJson(s){
+  if(!s) return null;
+  const m = s.match(/\{[\s\S]*\}/);
+  if(!m) return null;
+  try { return JSON.parse(m[0]); } catch { return null; }
+}
+/* hashStr — tiny stable hash for signatures (djb2). */
+function hashStr(s){ let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0; return h.toString(36); }
 
 /* ===================== HYDRATE FROM SAVED STATE ===================== */
 function hydrate() {
@@ -737,7 +1109,7 @@ function hydrate() {
   $("#f-cover").value = bible.cover;
   $("#f-keywords").value = bible.keywords;
   $$("#f-unreliable .chip").forEach(c => { if (bible.unreliable.includes(c.dataset.v)) c.classList.add("on"); });
-  renderTimeline(); renderBible(); recompute();
+  renderTimeline(); renderBible(); renderContradictions(); recompute();
 }
 
 /* The threshold is ALWAYS the landing page. If a world was chosen in a past
