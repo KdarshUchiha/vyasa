@@ -215,21 +215,45 @@ Here's the key insight of mind-bending stories:
 > **The order events happen ≠ the order the reader learns about them.**
 
 *Memento* is told backwards. *Inception* nests timelines. That gap is where
-disorientation lives. The Map lets you design it.
+disorientation lives. The Map lets you **design and see** it.
 
-### How to use it
-1. **Type a plot beat** in the box (e.g. *"The witness's testimony contradicts the
-   timestamp"*) and press **Enter**. It appears as a card.
-2. Add as many beats as you like.
-3. **Drag the cards up and down** to set the order the **reader** experiences them.
-4. Each card has a **reveal marker** on the right. Click it to cycle through:
-   - `hidden` — the reader doesn't understand this yet
-   - `hinted` — you've dropped a clue
-   - `revealed` — the reader now fully gets it
+### Add your beats
+**Type a plot beat** in the box (e.g. *"The witness's testimony contradicts the
+timestamp"*) and press **Enter**. Add as many as you like. Each beat has a **reveal
+marker** — click it to cycle:
+- `hidden` — the reader doesn't understand this yet
+- `hinted` — you've dropped a clue
+- `revealed` — the reader now fully gets it
 
-So you might place a beat *early* in reading-order but mark it `hidden`, meaning the
-reader sees it but won't understand its meaning until much later. **That's a designed
-mystery, not an accident.**
+### The Two-Track view (the heart of the Map)
+
+The Map shows **two columns side by side**:
+
+- **Left — Chronology:** the order events actually *happen* in your story's world.
+- **Right — Reader-Order:** the order the *reader* experiences them.
+- **Threads** connect the same beat across both columns.
+
+**Drag beats in either column** to reorder that timeline:
+- Drag in the **right** column to change what the reader sees first.
+- Drag in the **left** column to change the true chronology.
+
+When a beat sits in a *different* position in the two columns, its connecting thread
+**turns warm-coloured and crosses** — that crossing is your disorientation, made
+visible. A perfectly straight set of threads = a linear story; a tangle of crossings =
+a deeply non-linear labyrinth. Hover any beat to highlight its twin and thread.
+
+### Reveal Tension meter
+
+Below the tracks, **Reveal Tension** scores (0–100%) how far your beats are displaced
+between chronology and reader-order:
+- **0%** — perfectly linear (reader learns events as they happen).
+- **Mid** — "braided": the two timelines diverge meaningfully.
+- **High** — deeply fractured; near-total inversion = maximum disorientation.
+
+It's a dial for *how lost* your reader is. Tune it to taste.
+
+> 💡 Prefer the old simple view? Click **☰ Simple list** at the top of the Map to switch
+> to a single draggable list (reader-order only). **⇋ Two-Track** switches back.
 
 Click **"Lock the Blueprint →"** when done. (You can always come back and rearrange.)
 

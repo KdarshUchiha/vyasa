@@ -205,7 +205,7 @@ textarea { min-height: 96px; line-height: 1.55; }
 .btn.ghost:hover { border-color: var(--accent); }
 .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
-/* timeline chamber (Phase 2) */
+/* timeline chamber (Phase 2) — single-list fallback (still used for editing beats) */
 .timeline { display: flex; flex-direction: column; gap: .6rem; margin: 1rem 0; }
 .beat { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
   border-radius: 10px; padding: .8rem 1rem; cursor: grab; display: flex; align-items: center; gap: .8rem;
@@ -217,6 +217,51 @@ textarea { min-height: 96px; line-height: 1.55; }
   padding: .2rem .5rem; border-radius: 6px; }
 .beat input { border: none; background: transparent; padding: .2rem; }
 .beat input:focus { box-shadow: none; }
+
+/* ---- TWO-TRACK TIMELINE (chronology vs. reader-order, threaded) ---- */
+.tracks-wrap { position: relative; margin: 1rem 0 .5rem; }
+.tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 3.4rem; position: relative; }
+.track-col { display: flex; flex-direction: column; gap: .55rem; }
+.track-title { font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--accent);
+  display: flex; align-items: center; gap: .4rem; margin-bottom: .2rem; }
+.track-title .tt-sub { color: var(--ink-soft); letter-spacing: .04em; text-transform: none; font-size: .68rem; opacity: .8; }
+/* SVG layer that draws the connecting threads between the two columns */
+#thread-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+#thread-svg path { fill: none; stroke: var(--line); stroke-width: 1.6; transition: stroke .3s, stroke-width .3s; }
+#thread-svg path.crossed { stroke: var(--accent-2); stroke-width: 2; }
+#thread-svg path.hi { stroke: var(--accent); stroke-width: 3; }
+
+.tbeat { position: relative; z-index: 2; background: var(--panel); border: 1px solid var(--line);
+  border-left: 3px solid var(--accent); border-radius: 10px; padding: .55rem .7rem; cursor: grab;
+  display: flex; align-items: center; gap: .55rem; transition: box-shadow .2s, transform .1s, border-color .2s; }
+.tbeat:hover { box-shadow: var(--glow); }
+.tbeat.dragging { opacity: .35; }
+.tbeat.hi { border-color: var(--accent); box-shadow: var(--glow); }
+.tbeat .tnum { color: var(--accent); font-family: var(--font-head); font-size: .95rem; min-width: 18px; text-align: center; }
+.tbeat .ttext { flex: 1; font-size: .82rem; line-height: 1.3; overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tbeat .treveal { font-size: .58rem; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--line);
+  border-radius: 5px; padding: .12rem .35rem; cursor: pointer; color: var(--ink-soft); white-space: nowrap; }
+.tbeat .treveal[data-r="0"] { color: var(--ink-soft); }
+.tbeat .treveal[data-r="1"] { color: var(--accent); border-color: var(--accent); }
+.tbeat .treveal[data-r="2"] { color: var(--accent-2); border-color: var(--accent-2); }
+.tbeat .tdrop { color: var(--ink-soft); font-size: .8rem; cursor: grab; opacity: .5; }
+
+/* reveal-tension readout */
+.tension { display: flex; align-items: center; gap: 1rem; margin: 1rem 0 .3rem; flex-wrap: wrap; }
+.tension .t-meter { flex: 1; min-width: 200px; }
+.tension .t-lab { display: flex; justify-content: space-between; font-size: .72rem; color: var(--ink-soft);
+  letter-spacing: .1em; margin-bottom: .35rem; }
+.tension .t-track { height: 7px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.tension .t-fill { height: 100%; width: 0%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .7s cubic-bezier(.2,.9,.2,1); }
+.tension .t-note { font-size: .74rem; color: var(--ink-soft); font-style: italic; }
+.track-empty { font-size: .8rem; color: var(--ink-soft); font-style: italic; opacity: .6; padding: .6rem; text-align: center;
+  border: 1px dashed var(--line); border-radius: 10px; }
+.map-modes { display: flex; gap: .5rem; margin-bottom: .6rem; }
+.map-mode { font-size: .74rem; padding: .3rem .7rem; border: 1px solid var(--line); border-radius: 999px;
+  cursor: pointer; color: var(--ink-soft); transition: all .2s; }
+.map-mode.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
 /* desk chamber (Phase 3) */
 .desk-wrap { display: grid; grid-template-columns: 1fr; gap: 1rem; }
@@ -485,12 +530,45 @@ textarea { min-height: 96px; line-height: 1.55; }
     <section class="chamber" data-c="2">
       <div class="eyebrow">Phase II · The Labyrinth's Blueprint</div>
       <h2>The Non-Linear Map</h2>
-      <p class="sub">Order of events ≠ order of revelation. Add your beats, then drag them into the sequence the <em>reader</em> experiences. The gap between the two is where disorientation lives.</p>
+      <p class="sub">Order of events ≠ order of revelation. The gap between the two <em>is</em> the disorientation. Add your beats, then bend the two timelines apart.</p>
       <div class="field">
         <input type="text" id="beat-input" placeholder="Describe a beat, then press Enter — e.g. 'The witness's testimony contradicts the timestamp'" />
       </div>
-      <div class="timeline" id="timeline"></div>
-      <p class="muted">Drag to reorder. Each beat's <b>reveal</b> marker = when the reader truly understands its meaning.</p>
+
+      <div class="map-modes">
+        <span class="map-mode on" data-mode="tracks">⇋ Two-Track</span>
+        <span class="map-mode" data-mode="list">☰ Simple list</span>
+      </div>
+
+      <!-- TWO-TRACK VIEW -->
+      <div id="tracks-view">
+        <div class="tracks-wrap">
+          <svg id="thread-svg"></svg>
+          <div class="tracks">
+            <div class="track-col" id="col-chrono">
+              <div class="track-title">Chronology <span class="tt-sub">— when it happens</span></div>
+            </div>
+            <div class="track-col" id="col-reader">
+              <div class="track-title">Reader-Order <span class="tt-sub">— when they learn it</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="tension">
+          <div class="t-meter">
+            <div class="t-lab"><span>REVEAL TENSION</span><span id="tension-pct">—</span></div>
+            <div class="t-track"><div class="t-fill" id="tension-fill"></div></div>
+          </div>
+          <div class="t-note" id="tension-note">Drag the two columns apart to bend time.</div>
+        </div>
+        <p class="muted">Drag in either column to reorder. Threads turn <span style="color:var(--accent-2)">warm</span> where a beat's chronology and reader position diverge — that crossing is your disorientation, made visible. Click a beat's tag to cycle <b>hidden → hinted → revealed</b>.</p>
+      </div>
+
+      <!-- SIMPLE LIST VIEW (fallback / quick edit) -->
+      <div id="list-view" style="display:none">
+        <div class="timeline" id="timeline"></div>
+        <p class="muted">Drag to reorder reader-sequence. Each beat's <b>reveal</b> marker = when the reader truly understands it.</p>
+      </div>
+
       <button class="btn" id="save2" style="margin-top:1rem">Lock the Blueprint →</button>
     </section>
 
@@ -660,6 +738,11 @@ function migrate(b) {
   );
   b.canon = b.canon || [];
   b.contradictions = b.contradictions || [];
+  // Beats gain a `chrono` rank (position in story-world time). If missing, seed it
+  // from current reader-order so existing maps start with the two timelines aligned.
+  b.beats = (b.beats || []).map((bt, i) => ({ chrono: typeof bt.chrono === "number" ? bt.chrono : i, ...bt }));
+  // ensure chrono exists even when spread above didn't (older objects had no key)
+  b.beats.forEach((bt, i) => { if (typeof bt.chrono !== "number") bt.chrono = i; });
   return b;
 }
 function save() { localStorage.setItem(LS_KEY, JSON.stringify(bible)); }
@@ -694,6 +777,8 @@ $$(".chamber-btn").forEach(btn => {
     $$(".chamber").forEach(c => c.classList.remove("show"));
     btn.classList.add("active");
     $(`.chamber[data-c="${btn.dataset.c}"]`).classList.add("show");
+    // The two-track threads need real geometry; redraw when the Map becomes visible.
+    if (btn.dataset.c === "2" && mapMode === "tracks") requestAnimationFrame(() => { renderTracks(); });
   });
 });
 
@@ -870,14 +955,194 @@ function flashMuse() {
   setTimeout(() => { el.style.boxShadow = ""; }, 1400);
 }
 
-/* ===================== PHASE 2 — THE MAP ===================== */
+/* ===================== PHASE 2 — THE MAP (two-track) ===================== */
 const REVEALS = ["hidden", "hinted", "revealed"];
+
+/* bible.beats is stored in READER-ORDER (array index = reader position).
+   Each beat also carries `chrono` = its rank in story-world chronology.
+   The two-track view shows both orderings and threads the same beat across them. */
+
 $("#beat-input").addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.value.trim()) {
-    bible.beats.push({ id: Date.now()+Math.random(), text: e.target.value.trim(), reveal: 0 });
-    e.target.value = ""; save(); renderTimeline(); renderBible(); recompute();
+    const nextChrono = bible.beats.length ? Math.max(...bible.beats.map(b => b.chrono ?? 0)) + 1 : 0;
+    bible.beats.push({ id: uid(), text: e.target.value.trim(), reveal: 0, chrono: nextChrono });
+    e.target.value = ""; save(); renderMap(); renderBible(); recompute();
   }
 });
+
+/* view mode toggle */
+let mapMode = "tracks";
+$$(".map-mode").forEach(m => m.addEventListener("click", () => {
+  mapMode = m.dataset.mode;
+  $$(".map-mode").forEach(x => x.classList.toggle("on", x === m));
+  $("#tracks-view").style.display = mapMode === "tracks" ? "block" : "none";
+  $("#list-view").style.display   = mapMode === "list" ? "block" : "none";
+  renderMap();
+}));
+
+function renderMap() {
+  if (mapMode === "tracks") renderTracks(); else renderTimeline();
+}
+
+/* ---- chronology helpers ---- */
+function beatsByChrono() { return [...bible.beats].sort((a, b) => (a.chrono ?? 0) - (b.chrono ?? 0)); }
+function readerIndexOf(id) { return bible.beats.findIndex(b => b.id === id); }
+
+/* ---- TWO-TRACK RENDER ---- */
+function renderTracks() {
+  const chronoCol = $("#col-chrono"), readerCol = $("#col-reader");
+  // reset (keep the titles = first child)
+  chronoCol.querySelectorAll(".tbeat").forEach(n => n.remove());
+  readerCol.querySelectorAll(".tbeat").forEach(n => n.remove());
+
+  if (!bible.beats.length) {
+    const empty = `<div class="track-empty">Add beats above — they'll appear in both timelines.</div>`;
+    chronoCol.insertAdjacentHTML("beforeend", empty);
+    readerCol.insertAdjacentHTML("beforeend", empty);
+    drawThreads(); updateTension();
+    return;
+  }
+
+  const chrono = beatsByChrono();
+  chrono.forEach((b, i) => chronoCol.appendChild(makeTBeat(b, i + 1, "chrono")));
+  bible.beats.forEach((b, i) => readerCol.appendChild(makeTBeat(b, i + 1, "reader")));
+
+  bindTrackDrag("chrono"); bindTrackDrag("reader"); bindTBeatControls();
+  requestAnimationFrame(drawThreads);   // after layout settles
+  updateTension();
+}
+
+function makeTBeat(b, num, side) {
+  const el = document.createElement("div");
+  el.className = "tbeat"; el.draggable = true; el.dataset.id = b.id; el.dataset.side = side;
+  el.innerHTML =
+    `<span class="tnum">${num}</span>
+     <span class="ttext" title="${escapeHtml(b.text)}">${escapeHtml(b.text)}</span>
+     <span class="treveal" data-r="${b.reveal}" title="cycle reveal">${REVEALS[b.reveal]}</span>`;
+  // highlight the twin on hover to make the thread readable
+  el.addEventListener("mouseenter", () => highlightBeat(b.id, true));
+  el.addEventListener("mouseleave", () => highlightBeat(b.id, false));
+  return el;
+}
+
+function highlightBeat(id, on) {
+  $$(`.tbeat[data-id="${id}"]`).forEach(el => el.classList.toggle("hi", on));
+  const path = document.getElementById("thr-" + id);
+  if (path) path.classList.toggle("hi", on);
+}
+
+function bindTBeatControls() {
+  $$(".tbeat .treveal").forEach(r => r.addEventListener("click", e => {
+    e.stopPropagation();
+    const id = e.target.closest(".tbeat").dataset.id;
+    const b = bible.beats.find(x => x.id === id);
+    if (b) { b.reveal = (b.reveal + 1) % 3; save(); renderMap(); recompute(); }
+  }));
+}
+
+/* drag within a column; dropping reorders that column's sequence */
+function bindTrackDrag(side) {
+  const col = side === "chrono" ? $("#col-chrono") : $("#col-reader");
+  let dragEl = null;
+  col.querySelectorAll(".tbeat").forEach(el => {
+    el.addEventListener("dragstart", () => { dragEl = el; el.classList.add("dragging"); });
+    el.addEventListener("dragend", () => {
+      el.classList.remove("dragging");
+      persistTrackOrder(side);
+    });
+    el.addEventListener("dragover", e => {
+      e.preventDefault();
+      const after = getDragAfterEl(col, e.clientY);
+      if (after == null) col.appendChild(dragEl);
+      else col.insertBefore(dragEl, after);
+      requestAnimationFrame(drawThreads);
+    });
+  });
+}
+
+function getDragAfterEl(container, y) {
+  const els = [...container.querySelectorAll(".tbeat:not(.dragging)")];
+  return els.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: child };
+    return closest;
+  }, { offset: -Infinity }).element;
+}
+
+/* commit the new visual order into the data model */
+function persistTrackOrder(side) {
+  const col = side === "chrono" ? $("#col-chrono") : $("#col-reader");
+  const ids = [...col.querySelectorAll(".tbeat")].map(el => el.dataset.id);
+  if (side === "reader") {
+    // reorder the beats array itself
+    bible.beats.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  } else {
+    // reassign chrono ranks by the dropped order
+    ids.forEach((id, i) => { const b = bible.beats.find(x => x.id === id); if (b) b.chrono = i; });
+  }
+  save(); renderMap(); recompute();
+}
+
+/* ---- THREADS: connect each beat's chronology node to its reader node ---- */
+function drawThreads() {
+  const svg = $("#thread-svg"); if (!svg) return;
+  const wrap = svg.parentElement;
+  const wb = wrap.getBoundingClientRect();
+  svg.setAttribute("viewBox", `0 0 ${wb.width} ${wb.height}`);
+  svg.innerHTML = "";
+  bible.beats.forEach(b => {
+    const cEl = $(`#col-chrono .tbeat[data-id="${b.id}"]`);
+    const rEl = $(`#col-reader .tbeat[data-id="${b.id}"]`);
+    if (!cEl || !rEl) return;
+    const cb = cEl.getBoundingClientRect(), rb = rEl.getBoundingClientRect();
+    const x1 = cb.right - wb.left, y1 = cb.top + cb.height / 2 - wb.top;
+    const x2 = rb.left - wb.left,  y2 = rb.top + rb.height / 2 - wb.top;
+    const mx = (x1 + x2) / 2;
+    const chronoRank = beatsByChrono().findIndex(x => x.id === b.id);
+    const readerRank = readerIndexOf(b.id);
+    const crossed = chronoRank !== readerRank;   // divergence = disorientation
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`);
+    path.setAttribute("id", "thr-" + b.id);
+    if (crossed) path.setAttribute("class", "crossed");
+    svg.appendChild(path);
+  });
+}
+window.addEventListener("resize", () => { if (mapMode === "tracks") drawThreads(); });
+
+/* ---- REVEAL TENSION: how far, on average, beats are displaced between the two
+   orderings (normalized 0–100). 0 = perfectly linear; high = deeply non-linear. */
+function computeTension() {
+  const n = bible.beats.length;
+  if (n < 2) return 0;
+  const chrono = beatsByChrono().map(b => b.id);
+  let displacement = 0;
+  bible.beats.forEach((b, readerRank) => {
+    const chronoRank = chrono.indexOf(b.id);
+    displacement += Math.abs(chronoRank - readerRank);
+  });
+  // max total displacement for n items is ~ n^2/2; normalize against it
+  const maxDisp = Math.floor(n * n / 2);
+  return Math.min(100, Math.round((displacement / maxDisp) * 100));
+}
+function updateTension() {
+  const t = computeTension();
+  const fill = $("#tension-fill"), pct = $("#tension-pct"), note = $("#tension-note");
+  if (fill) fill.style.width = t + "%";
+  if (pct) pct.textContent = bible.beats.length < 2 ? "—" : t + "%";
+  if (note) note.textContent = tensionNote(t);
+}
+function tensionNote(t) {
+  if (bible.beats.length < 2) return "Drag the two columns apart to bend time.";
+  if (t === 0) return "Perfectly linear — the reader learns events as they happen.";
+  if (t < 25) return "Gently non-linear — subtle reordering.";
+  if (t < 55) return "Braided — reader and chronology diverge meaningfully.";
+  if (t < 80) return "Deeply fractured — the labyrinth twists hard.";
+  return "Near-total inversion — maximum disorientation. Handle with care.";
+}
+
+/* ---- SIMPLE LIST RENDER (fallback / quick edit) ---- */
 function renderTimeline() {
   const tl = $("#timeline"); tl.innerHTML = "";
   bible.beats.forEach((b, i) => {
@@ -921,7 +1186,7 @@ function getDragAfter(container, y) {
 function persistBeatOrder() {
   const ids = $$(".beat").map(el => el.dataset.id);
   bible.beats.sort((a,b) => ids.indexOf(String(a.id)) - ids.indexOf(String(b.id)));
-  save(); renderTimeline(); recompute();
+  save(); renderMap(); recompute();
 }
 $("#save2").addEventListener("click", () => { toast("Blueprint locked. Revelation ≠ chronology."); goChamber(3); });
 
@@ -1406,7 +1671,7 @@ function hydrate() {
   $("#f-cover").value = bible.cover;
   $("#f-keywords").value = bible.keywords;
   $$("#f-unreliable .chip").forEach(c => c.classList.toggle("on", bible.unreliable.includes(c.dataset.v)));
-  renderTimeline(); renderBible(); renderContradictions(); recompute();
+  renderMap(); renderBible(); renderContradictions(); recompute();
 }
 
 /* The threshold is ALWAYS the landing page. If a world was chosen in a past
