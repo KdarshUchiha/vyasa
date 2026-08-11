@@ -121,6 +121,9 @@ body::after {
 #resume-bar { display: flex; flex-direction: column; align-items: center; gap: .6rem; margin-top: -.6rem; }
 #resume-bar .btn { font-size: .95rem; }
 .resume-fresh { color: var(--ink-soft); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
+.threshold-guide { color: var(--accent); text-decoration: none; font-size: .82rem; letter-spacing: .06em;
+  border: 1px solid var(--line); border-radius: 999px; padding: .45rem 1rem; transition: all .25s; }
+.threshold-guide:hover { border-color: var(--accent); box-shadow: var(--glow); }
 .genres { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; max-width: 760px; }
 .genre-card {
   cursor: pointer; width: 168px; padding: 1.4rem 1rem; border-radius: var(--radius);
@@ -303,6 +306,7 @@ textarea { min-height: 96px; line-height: 1.55; }
     <div class="genre-card" data-g="fantasy"><span class="sym">❋</span><span class="nm">FANTASY</span><div class="fx">luminous · mythic · deep</div></div>
   </div>
   <div class="muted" style="max-width:520px;text-align:center">You are not filling in prompts. You are building a machine of illusion — Vyasa keeps the rules so your reader gets lost, and you never do.</div>
+  <a href="https://github.com/KdarshUchiha/vyasa/blob/main/GUIDE.md" target="_blank" rel="noopener" class="threshold-guide">📖 New here? Read the Guide</a>
 </div>
 
 <!-- ===================== APP ===================== -->
@@ -315,6 +319,7 @@ textarea { min-height: 96px; line-height: 1.55; }
     <button class="chamber-btn" data-c="3"><span>🎭</span><span class="cn">DESK</span></button>
     <button class="chamber-btn" data-c="4"><span>📢</span><span class="cn">LAUNCH</span></button>
     <div class="spacer"></div>
+    <a class="mini" href="https://github.com/KdarshUchiha/vyasa/blob/main/GUIDE.md" target="_blank" rel="noopener" title="Read the Guide" style="text-decoration:none">❓</a>
     <div class="mini" id="reskin" title="Change world">🎚️</div>
     <div class="mini" id="export" title="Export Story Bible">⬇</div>
     <div class="mini" id="wipe" title="Reset everything">⟲</div>

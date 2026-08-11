@@ -12,7 +12,8 @@
 > Not a prompt box. The interface *is* the co-architect — the whole environment bends to the story you're building.
 
 <p align="center">
-  <a href="https://kdarshuchiha.github.io/vyasa/">🌐 Open the Table</a>
+  <a href="https://kdarshuchiha.github.io/vyasa/">🌐 Open the Table</a> •
+  <a href="GUIDE.md">📖 Read the Guide</a>
 </p>
 
 <p align="center">
