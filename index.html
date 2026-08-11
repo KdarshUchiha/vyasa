@@ -118,6 +118,9 @@ body::after {
 .brand p { color: var(--ink-soft); letter-spacing: .35em; text-transform: uppercase;
   font-size: .72rem; margin-top: .8rem; }
 .prompt-line { color: var(--ink-soft); font-size: 1rem; letter-spacing: .04em; }
+#resume-bar { display: flex; flex-direction: column; align-items: center; gap: .6rem; margin-top: -.6rem; }
+#resume-bar .btn { font-size: .95rem; }
+.resume-fresh { color: var(--ink-soft); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
 .genres { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; max-width: 760px; }
 .genre-card {
   cursor: pointer; width: 168px; padding: 1.4rem 1rem; border-radius: var(--radius);
@@ -737,11 +740,23 @@ function hydrate() {
   renderTimeline(); renderBible(); recompute();
 }
 
-/* If a world was already chosen in a past session, skip the threshold. */
+/* The threshold is ALWAYS the landing page. If a world was chosen in a past
+   session we don't skip it — we tint the threshold to that world and offer a
+   "Continue" button so saved work is one click away but never forced. */
 if (bible.genre && bible.genre !== "void") {
-  document.documentElement.dataset.genre = bible.genre;
-  $("#threshold").classList.add("gone"); $("#threshold").style.display = "none";
-  $("#app").classList.add("live"); hydrate();
+  document.documentElement.dataset.genre = bible.genre;   // preview last world's palette
+  showResume(bible.genre);
+}
+function showResume(g) {
+  const names = { scifi:"Sci-Fi", horror:"Horror", thriller:"Thriller", fantasy:"Fantasy" };
+  const bar = document.createElement("div");
+  bar.id = "resume-bar";
+  bar.innerHTML =
+    `<button class="btn" id="resume-btn">↩ Continue your ${names[g]||"labyrinth"}</button>` +
+    `<span class="resume-fresh" id="resume-fresh">or begin anew — choose a world below</span>`;
+  const brand = document.querySelector("#threshold .brand");
+  brand.insertAdjacentElement("afterend", bar);
+  $("#resume-btn").addEventListener("click", () => enterWorld(g));  // resumes; keeps saved Bible
 }
 </script>
 </body>
