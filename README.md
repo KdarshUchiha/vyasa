@@ -15,6 +15,10 @@
   <a href="https://kdarshuchiha.github.io/vyasa/">🌐 Open the Table</a>
 </p>
 
+<p align="center">
+  <img src="og-image.png" alt="Vyasa — The Architect's Table" width="760">
+</p>
+
 ---
 
 ## What it is

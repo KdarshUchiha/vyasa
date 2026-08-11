@@ -15,3 +15,6 @@ desktop.ini
 # Exported user bibles (personal data — don't commit)
 *-story-bible.json
 vyasa-story-bible.json
+
+# OG-image build scaffolding (keep the rendered og-image.png, drop the tooling)
+.og/
