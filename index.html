@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en" data-genre="void">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vyasa · The Architect's Table</title>
+<style>
+/* ============================================================================
+   VYASA — The Architect's Table
+   A genre-reactive creative instrument for mind-bending novels & screenplays.
+   Everything below reskins live when the writer names their genre-fusion.
+   Design tokens are CSS variables on :root, overridden per [data-genre].
+   ============================================================================ */
+
+:root {
+  /* Default "void" theme — before a genre is chosen (the threshold) */
+  --bg:        #0a0a0f;
+  --bg-2:      #12121c;
+  --panel:     #16161f;
+  --ink:       #e9e9f2;
+  --ink-soft:  #9a9ab0;
+  --accent:    #7c7cff;
+  --accent-2:  #ff5c8a;
+  --line:      #262636;
+  --glow:      0 0 40px rgba(124,124,255,0.25);
+  --font-head: "Georgia", serif;
+  --font-body: "Georgia", serif;
+  --radius:    14px;
+  --grain:     0.03;
+  --skew:      0deg;
+}
+
+/* ---- SCI-FI: cold, precise, algorithmic ---- */
+[data-genre="scifi"] {
+  --bg: #060a12; --bg-2: #0a1220; --panel: #0d1626;
+  --ink: #d6f0ff; --ink-soft: #6f8ba3;
+  --accent: #29d3ff; --accent-2: #00ffa3; --line: #16324a;
+  --glow: 0 0 44px rgba(41,211,255,0.30);
+  --font-head: "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Helvetica Neue", Arial, sans-serif;
+  --grain: 0.02;
+}
+/* ---- HORROR: decayed, warm-dark, unstable ---- */
+[data-genre="horror"] {
+  --bg: #0c0705; --bg-2: #150a08; --panel: #170c09;
+  --ink: # efe3da; --ink: #efe3da; --ink-soft: #a07f74;
+  --accent: #b5121b; --accent-2: #d98324; --line: #2e1712;
+  --glow: 0 0 50px rgba(181,18,27,0.35);
+  --font-head: "Georgia", serif; --font-body: "Georgia", serif;
+  --grain: 0.06; --skew: -0.4deg;
+}
+/* ---- THRILLER: high-contrast, taut, forensic ---- */
+[data-genre="thriller"] {
+  --bg: #0b0d10; --bg-2: #12161c; --panel: #151a21;
+  --ink: #eef2f6; --ink-soft: #8b97a5;
+  --accent: #ffcf33; --accent-2: #ff4d4d; --line: #232c37;
+  --glow: 0 0 38px rgba(255,207,51,0.22);
+  --font-head: "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Georgia", serif;
+  --grain: 0.03;
+}
+/* ---- FANTASY: luminous, deep, mythic ---- */
+[data-genre="fantasy"] {
+  --bg: #0a0713; --bg-2: #120c22; --panel: #150e28;
+  --ink: #f1e6ff; --ink-soft: #a48fc4;
+  --accent: #b98cff; --accent-2: #ffd27a; --line: #2a1d45;
+  --glow: 0 0 50px rgba(185,140,255,0.32);
+  --font-head: "Georgia", serif; --font-body: "Georgia", serif;
+  --grain: 0.04;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: radial-gradient(1200px 800px at 70% -10%, var(--bg-2), var(--bg)) fixed;
+  color: var(--ink);
+  font-family: var(--font-body);
+  transition: background 1.1s ease, color .6s ease;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+/* film grain / instability overlay — intensity is genre-driven */
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  opacity: var(--grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay; animation: grain 1.2s steps(2) infinite;
+}
+@keyframes grain { 0%{transform:translate(0,0)} 50%{transform:translate(-4%,3%)} 100%{transform:translate(3%,-2%)} }
+
+/* ===================== THRESHOLD (genre selection) ===================== */
+#threshold {
+  position: fixed; inset: 0; z-index: 500; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2.2rem;
+  background: radial-gradient(900px 600px at 50% 30%, var(--bg-2), var(--bg));
+  transition: opacity .8s ease, transform .8s ease;
+}
+#threshold.gone { opacity: 0; transform: scale(1.08); pointer-events: none; }
+.brand { text-align: center; }
+.brand h1 {
+  font-family: var(--font-head); font-size: clamp(2.6rem, 7vw, 5rem);
+  letter-spacing: .22em; margin: 0; font-weight: 400;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(var(--glow));
+}
+.brand p { color: var(--ink-soft); letter-spacing: .35em; text-transform: uppercase;
+  font-size: .72rem; margin-top: .8rem; }
+.prompt-line { color: var(--ink-soft); font-size: 1rem; letter-spacing: .04em; }
+.genres { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; max-width: 760px; }
+.genre-card {
+  cursor: pointer; width: 168px; padding: 1.4rem 1rem; border-radius: var(--radius);
+  border: 1px solid var(--line); background: var(--panel);
+  text-align: center; transition: transform .35s cubic-bezier(.2,.9,.2,1), box-shadow .35s, border-color .35s;
+}
+.genre-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: var(--glow); border-color: var(--accent); }
+.genre-card .sym { font-size: 2rem; display: block; margin-bottom: .5rem; }
+.genre-card .nm { font-family: var(--font-head); letter-spacing: .12em; font-size: 1.05rem; }
+.genre-card .fx { color: var(--ink-soft); font-size: .72rem; margin-top: .35rem; }
+
+/* ===================== APP SHELL ===================== */
+#app { display: none; min-height: 100vh; }
+#app.live { display: grid; grid-template-columns: 84px 1fr 340px; }
+
+/* left rail — the four chambers */
+.rail { border-right: 1px solid var(--line); background: var(--panel);
+  display: flex; flex-direction: column; align-items: center; padding: 1rem 0; gap: .4rem; position: sticky; top: 0; height: 100vh; }
+.rail .logo { font-family: var(--font-head); font-size: 1.4rem; color: var(--accent);
+  writing-mode: vertical-rl; letter-spacing: .3em; margin-bottom: 1rem; filter: drop-shadow(var(--glow)); }
+.chamber-btn { width: 56px; height: 56px; border-radius: 12px; border: 1px solid transparent;
+  background: transparent; color: var(--ink-soft); cursor: pointer; font-size: 1.4rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: all .3s; gap: 2px; }
+.chamber-btn .cn { font-size: .5rem; letter-spacing: .08em; }
+.chamber-btn:hover { color: var(--ink); border-color: var(--line); }
+.chamber-btn.active { color: var(--ink); border-color: var(--accent); background: var(--bg-2); box-shadow: var(--glow); }
+.rail .spacer { flex: 1; }
+.rail .mini { font-size: 1.1rem; cursor: pointer; color: var(--ink-soft); padding: .4rem; }
+
+/* center stage */
+.stage { padding: 2.4rem 3rem; max-width: 900px; }
+.chamber { display: none; animation: rise .6s cubic-bezier(.2,.9,.2,1); }
+.chamber.show { display: block; }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.eyebrow { color: var(--accent); letter-spacing: .3em; text-transform: uppercase; font-size: .7rem; }
+.stage h2 { font-family: var(--font-head); font-size: 2rem; margin: .3rem 0 .2rem; font-weight: 400; transform: skew(var(--skew)); }
+.stage .sub { color: var(--ink-soft); margin-bottom: 1.8rem; font-size: .95rem; line-height: 1.5; }
+
+.field { margin-bottom: 1.5rem; }
+.field label { display: block; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-soft); margin-bottom: .5rem; }
+.field .hint { font-size: .78rem; color: var(--ink-soft); opacity: .8; margin-top: .35rem; font-style: italic; }
+textarea, input[type=text], select {
+  width: 100%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink);
+  border-radius: 10px; padding: .8rem 1rem; font-family: var(--font-body); font-size: 1rem;
+  resize: vertical; transition: border-color .3s, box-shadow .3s; }
+textarea:focus, input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: var(--glow); }
+textarea { min-height: 96px; line-height: 1.55; }
+
+.chips { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .4rem; }
+.chip { padding: .4rem .8rem; border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+  font-size: .82rem; color: var(--ink-soft); transition: all .25s; user-select: none; }
+.chip:hover { border-color: var(--accent); color: var(--ink); }
+.chip.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+.btn { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: var(--bg);
+  border: none; padding: .7rem 1.3rem; border-radius: 10px; font-weight: 700; cursor: pointer;
+  letter-spacing: .04em; transition: transform .2s, box-shadow .2s; font-family: var(--font-body); }
+.btn:hover { transform: translateY(-2px); box-shadow: var(--glow); }
+.btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+.btn.ghost:hover { border-color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+/* timeline chamber (Phase 2) */
+.timeline { display: flex; flex-direction: column; gap: .6rem; margin: 1rem 0; }
+.beat { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: 10px; padding: .8rem 1rem; cursor: grab; display: flex; align-items: center; gap: .8rem;
+  transition: box-shadow .2s, transform .1s; }
+.beat:hover { box-shadow: var(--glow); }
+.beat.dragging { opacity: .4; }
+.beat .order { color: var(--accent); font-family: var(--font-head); font-size: 1.1rem; min-width: 22px; }
+.beat .reveal { margin-left: auto; font-size: .7rem; color: var(--ink-soft); border: 1px solid var(--line);
+  padding: .2rem .5rem; border-radius: 6px; }
+.beat input { border: none; background: transparent; padding: .2rem; }
+.beat input:focus { box-shadow: none; }
+
+/* desk chamber (Phase 3) */
+.desk-wrap { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+#manuscript { min-height: 320px; font-size: 1.05rem; line-height: 1.7; }
+.coherence-readout { display: flex; flex-direction: column; gap: .6rem; }
+
+/* ===================== RIGHT: STORY BIBLE ===================== */
+.bible { border-left: 1px solid var(--line); background: var(--panel); padding: 1.4rem;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.bible h3 { font-family: var(--font-head); font-weight: 400; letter-spacing: .1em; margin: 0 0 .3rem; }
+.bible .tag { color: var(--ink-soft); font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; }
+
+/* coherence meter */
+.meter { margin: 1.2rem 0; }
+.meter .lab { display: flex; justify-content: space-between; font-size: .75rem; color: var(--ink-soft); margin-bottom: .4rem; letter-spacing: .1em; }
+.meter .track { height: 8px; border-radius: 999px; background: var(--bg); overflow: hidden; border: 1px solid var(--line); }
+.meter .fill { height: 100%; width: 0%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent)); transition: width .8s cubic-bezier(.2,.9,.2,1); }
+
+.bible-section { margin-top: 1.2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.bible-section .k { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.bible-section .v { font-size: .9rem; line-height: 1.45; margin-top: .3rem; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+.bible-section .v.empty { color: var(--ink-soft); font-style: italic; opacity: .6; }
+
+.rules-list { list-style: none; padding: 0; margin: .4rem 0 0; }
+.rules-list li { font-size: .84rem; padding: .4rem .6rem; background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 8px; margin-bottom: .35rem; display: flex; gap: .5rem; align-items: flex-start; }
+.rules-list li .x { margin-left: auto; cursor: pointer; color: var(--accent-2); }
+
+/* AI assist panel */
+.assist { margin-top: 1rem; border: 1px dashed var(--line); border-radius: 10px; padding: .8rem; }
+.assist .row { display: flex; gap: .4rem; margin-bottom: .5rem; }
+.assist input { font-size: .8rem; padding: .5rem; }
+.assist .out { font-size: .84rem; line-height: 1.5; color: var(--ink); white-space: pre-wrap;
+  max-height: 220px; overflow-y: auto; margin-top: .5rem; }
+.assist select { font-size: .78rem; padding: .4rem; }
+.muted { color: var(--ink-soft); font-size: .72rem; line-height: 1.4; }
+
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--panel); border: 1px solid var(--accent); color: var(--ink); padding: .7rem 1.2rem;
+  border-radius: 10px; box-shadow: var(--glow); transition: transform .4s; z-index: 800; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+::-webkit-scrollbar { width: 9px; } ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 9px; }
+</style>
+</head>
+<body>
+
+<!-- ===================== THRESHOLD ===================== -->
+<div id="threshold">
+  <div class="brand">
+    <h1>VYASA</h1>
+    <p>The Architect's Table</p>
+  </div>
+  <div class="prompt-line">Every labyrinth begins with a single distortion. Choose the world you will bend.</div>
+  <div class="genres" id="genres">
+    <div class="genre-card" data-g="scifi"><span class="sym">◈</span><span class="nm">SCI-FI</span><div class="fx">cold · algorithmic · vast</div></div>
+    <div class="genre-card" data-g="horror"><span class="sym">☾</span><span class="nm">HORROR</span><div class="fx">decayed · unstable · dread</div></div>
+    <div class="genre-card" data-g="thriller"><span class="sym">✦</span><span class="nm">THRILLER</span><div class="fx">taut · forensic · doubt</div></div>
+    <div class="genre-card" data-g="fantasy"><span class="sym">❋</span><span class="nm">FANTASY</span><div class="fx">luminous · mythic · deep</div></div>
+  </div>
+  <div class="muted" style="max-width:520px;text-align:center">You are not filling in prompts. You are building a machine of illusion — Vyasa keeps the rules so your reader gets lost, and you never do.</div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+  <!-- LEFT RAIL -->
+  <nav class="rail">
+    <div class="logo">VYASA</div>
+    <button class="chamber-btn active" data-c="1"><span>🌀</span><span class="cn">GENESIS</span></button>
+    <button class="chamber-btn" data-c="2"><span>🗺️</span><span class="cn">MAP</span></button>
+    <button class="chamber-btn" data-c="3"><span>🎭</span><span class="cn">DESK</span></button>
+    <button class="chamber-btn" data-c="4"><span>📢</span><span class="cn">LAUNCH</span></button>
+    <div class="spacer"></div>
+    <div class="mini" id="reskin" title="Change world">🎚️</div>
+    <div class="mini" id="export" title="Export Story Bible">⬇</div>
+    <div class="mini" id="wipe" title="Reset everything">⟲</div>
+  </nav>
+
+  <!-- CENTER STAGE -->
+  <main class="stage">
+    <!-- PHASE 1 — GENESIS -->
+    <section class="chamber show" data-c="1">
+      <div class="eyebrow">Phase I · The Genesis of Disorientation</div>
+      <h2>The Central Paradox</h2>
+      <p class="sub">This is the fulcrum on which reality bends — the one unresolvable contradiction your whole story orbits. Define it, and everything downstream inherits its logic.</p>
+
+      <div class="field">
+        <label>Working Title</label>
+        <input type="text" id="f-title" placeholder="Untitled labyrinth…" />
+      </div>
+      <div class="field">
+        <label>The Anomaly — one impossible premise</label>
+        <textarea id="f-paradox" placeholder="e.g. A detective investigating a murder slowly realizes the victim, the killer, and the witness are all himself at different points in a collapsing timeline."></textarea>
+        <div class="hint">One primary paradox. This is your anchor — not a plot, a warp in reality.</div>
+      </div>
+      <div class="field">
+        <label>Thematic Resonance — the human question underneath</label>
+        <textarea id="f-theme" placeholder="e.g. Is identity anything more than the story we tell ourselves in sequence?"></textarea>
+        <div class="hint">Beyond the twist: what does this force the reader to confront?</div>
+      </div>
+      <div class="field">
+        <label>The Unreliable Mechanism — how you erode trust</label>
+        <div class="chips" id="f-unreliable">
+          <span class="chip" data-v="Memory-gapped narrator">Memory-gapped narrator</span>
+          <span class="chip" data-v="Shifting environment">Shifting environment</span>
+          <span class="chip" data-v="Contradictory sources">Contradictory sources</span>
+          <span class="chip" data-v="Fractured timeline">Fractured timeline</span>
+          <span class="chip" data-v="Hallucination">Hallucination</span>
+          <span class="chip" data-v="Deliberate deception">Deliberate deception</span>
+        </div>
+        <div class="hint">Pick 1–2. Restraint is what separates design from cheap trick.</div>
+      </div>
+      <button class="btn" id="save1">Anchor the Paradox →</button>
+    </section>
+
+    <!-- PHASE 2 — THE MAP -->
+    <section class="chamber" data-c="2">
+      <div class="eyebrow">Phase II · The Labyrinth's Blueprint</div>
+      <h2>The Non-Linear Map</h2>
+      <p class="sub">Order of events ≠ order of revelation. Add your beats, then drag them into the sequence the <em>reader</em> experiences. The gap between the two is where disorientation lives.</p>
+      <div class="field">
+        <input type="text" id="beat-input" placeholder="Describe a beat, then press Enter — e.g. 'The witness's testimony contradicts the timestamp'" />
+      </div>
+      <div class="timeline" id="timeline"></div>
+      <p class="muted">Drag to reorder. Each beat's <b>reveal</b> marker = when the reader truly understands its meaning.</p>
+      <button class="btn" id="save2" style="margin-top:1rem">Lock the Blueprint →</button>
+    </section>
+
+    <!-- PHASE 3 — THE DESK -->
+    <section class="chamber" data-c="3">
+      <div class="eyebrow">Phase III · Crafting the Illusion</div>
+      <h2>The Desk of Coherent Incoherence</h2>
+      <p class="sub">Write here. Vyasa watches your prose against the rules you set — so the chaos stays <em>designed</em>. The Coherence meter (right) rises as your text honours your own logic and echoes your paradox.</p>
+      <div class="desk-wrap">
+        <textarea id="manuscript" placeholder="Begin the scene. Let the reader feel the reality breaking — but never break your own rules by accident…"></textarea>
+      </div>
+      <div style="display:flex;gap:.6rem;margin-top:1rem">
+        <button class="btn ghost" id="check3">Audit Coherence</button>
+        <button class="btn" id="save3">Save Passage →</button>
+      </div>
+      <div id="audit-out" class="assist out" style="margin-top:1rem"></div>
+    </section>
+
+    <!-- PHASE 4 — LAUNCH -->
+    <section class="chamber" data-c="4">
+      <div class="eyebrow">Phase IV · Launching the Labyrinth</div>
+      <h2>The Herald</h2>
+      <p class="sub">Package the experience without spoiling the maze. Vyasa drafts from your Bible — a blurb that tantalizes, a cover brief, and the keywords that reach readers of Crouch, VanderMeer, Nolan.</p>
+      <div class="field">
+        <label>The Hook of Confusion — your blurb</label>
+        <textarea id="f-blurb" placeholder="150–200 words that promise a mind-bend and end on an unanswerable question…"></textarea>
+      </div>
+      <div class="field">
+        <label>Cover Brief — the visual tease</label>
+        <textarea id="f-cover" placeholder="Abstract, symbolic, no literal spoilers. Palette, motif, mood…"></textarea>
+      </div>
+      <div class="field">
+        <label>Comp Titles & Keywords</label>
+        <input type="text" id="f-keywords" placeholder="reality-bending, unreliable narrator, temporal paradox · comps: Inception, Recursion, Annihilation" />
+      </div>
+      <button class="btn" id="save4">Seal the Labyrinth →</button>
+    </section>
+  </main>
+
+  <!-- RIGHT: STORY BIBLE -->
+  <aside class="bible">
+    <span class="tag">Living Document</span>
+    <h3 id="bible-title">The Story Bible</h3>
+
+    <div class="meter">
+      <div class="lab"><span>COHERENCE</span><span id="coh-pct">—</span></div>
+      <div class="track"><div class="fill" id="coh-fill"></div></div>
+      <div class="muted" id="coh-note">Anchor a paradox to begin measuring.</div>
+    </div>
+
+    <div class="bible-section">
+      <div class="k">Central Paradox</div>
+      <div class="v empty" id="b-paradox">Not yet forged.</div>
+    </div>
+    <div class="bible-section">
+      <div class="k">Theme</div>
+      <div class="v empty" id="b-theme">—</div>
+    </div>
+    <div class="bible-section">
+      <div class="k">Unreliability</div>
+      <div class="v empty" id="b-unreliable">—</div>
+    </div>
+    <div class="bible-section">
+      <div class="k">Rules of the Anomaly</div>
+      <ul class="rules-list" id="b-rules"></ul>
+      <input type="text" id="rule-input" placeholder="+ add a rule (its limits & triggers)" style="margin-top:.4rem;font-size:.8rem" />
+    </div>
+    <div class="bible-section">
+      <div class="k">Beats Mapped</div>
+      <div class="v" id="b-beats">0</div>
+    </div>
+
+    <!-- AI ASSIST (bring your own key) -->
+    <div class="assist">
+      <div class="k" style="color:var(--accent);font-size:.68rem;letter-spacing:.18em">✦ THE MUSE (optional)</div>
+      <p class="muted">Plug in your own key to have Vyasa co-write. Your key stays in this browser — it is never sent anywhere but the provider you choose.</p>
+      <div class="row">
+        <select id="ai-provider">
+          <option value="gemini">Gemini</option>
+          <option value="groq">Groq</option>
+        </select>
+        <input type="text" id="ai-key" placeholder="paste API key" />
+      </div>
+      <select id="ai-task" style="width:100%;margin-bottom:.5rem">
+        <option value="paradox">Suggest a sharper paradox</option>
+        <option value="beats">Propose non-linear beats</option>
+        <option value="dialogue">Write a dialogue of doubt</option>
+        <option value="blurb">Draft the blurb</option>
+        <option value="cover">Cover concepts</option>
+      </select>
+      <button class="btn" id="ai-go" style="width:100%">Consult the Muse</button>
+      <div class="out" id="ai-out"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================================
+   VYASA — client logic. No build step, no backend. State persists to
+   localStorage so the labyrinth remembers itself. The "agent" is the
+   interaction: the UI reacts to genre, and the Coherence engine watches the
+   writer's prose against their own declared rules.
+   ============================================================================ */
+
+const $  = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const LS_KEY = "vyasa.bible.v1";
+
+/* ---- The Story Bible: single source of truth ---- */
+const defaultBible = () => ({
+  genre: "void", title: "", paradox: "", theme: "",
+  unreliable: [], rules: [], beats: [], manuscript: "",
+  blurb: "", cover: "", keywords: "", coherence: 0,
+});
+let bible = load();
+
+function load() {
+  try { const r = JSON.parse(localStorage.getItem(LS_KEY)); return r ? {...defaultBible(), ...r} : defaultBible(); }
+  catch { return defaultBible(); }
+}
+function save() { localStorage.setItem(LS_KEY, JSON.stringify(bible)); }
+
+/* ---- Genre voice: how Vyasa speaks per world (flavor text) ---- */
+const GENRE_VOICE = {
+  scifi:    { title: "The Simulation Bible", coh: "Systems nominal. Consistency is survival." },
+  horror:   { title: "The Grimoire",         coh: "It stays coherent, or it stops being frightening." },
+  thriller: { title: "The Case File",        coh: "Every contradiction is evidence. Track it." },
+  fantasy:  { title: "The Codex",            coh: "Magic without rules is noise. Hold the law." },
+  void:     { title: "The Story Bible",      coh: "Anchor a paradox to begin measuring." },
+};
+
+/* ===================== THRESHOLD → APP ===================== */
+$$(".genre-card").forEach(card => {
+  card.addEventListener("click", () => enterWorld(card.dataset.g));
+});
+function enterWorld(g) {
+  bible.genre = g; save();
+  document.documentElement.dataset.genre = g;
+  $("#threshold").classList.add("gone");
+  setTimeout(() => { $("#threshold").style.display = "none"; $("#app").classList.add("live"); }, 750);
+  hydrate();
+}
+
+/* ===================== CHAMBER NAV ===================== */
+$$(".chamber-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    $$(".chamber-btn").forEach(b => b.classList.remove("active"));
+    $$(".chamber").forEach(c => c.classList.remove("show"));
+    btn.classList.add("active");
+    $(`.chamber[data-c="${btn.dataset.c}"]`).classList.add("show");
+  });
+});
+
+/* ===================== PHASE 1 — GENESIS ===================== */
+$$("#f-unreliable .chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    chip.classList.toggle("on");
+    const on = $$("#f-unreliable .chip.on").map(c => c.dataset.v);
+    if (on.length > 2) { chip.classList.remove("on"); toast("Restraint — 2 mechanisms max."); return; }
+    bible.unreliable = on; save(); renderBible(); recompute();
+  });
+});
+["f-title","f-paradox","f-theme"].forEach(id => {
+  $("#"+id).addEventListener("input", e => {
+    bible[id.replace("f-","")] = e.target.value; save(); renderBible(); recompute();
+  });
+});
+$("#save1").addEventListener("click", () => { toast("Paradox anchored. The world now inherits its logic."); goChamber(2); });
+
+/* ===================== PHASE 2 — THE MAP ===================== */
+const REVEALS = ["hidden", "hinted", "revealed"];
+$("#beat-input").addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.value.trim()) {
+    bible.beats.push({ id: Date.now()+Math.random(), text: e.target.value.trim(), reveal: 0 });
+    e.target.value = ""; save(); renderTimeline(); renderBible(); recompute();
+  }
+});
+function renderTimeline() {
+  const tl = $("#timeline"); tl.innerHTML = "";
+  bible.beats.forEach((b, i) => {
+    const el = document.createElement("div");
+    el.className = "beat"; el.draggable = true; el.dataset.id = b.id;
+    el.innerHTML = `<span class="order">${i+1}</span>
+      <input type="text" value="${escapeHtml(b.text)}" data-id="${b.id}" />
+      <span class="reveal" data-id="${b.id}">${REVEALS[b.reveal]}</span>`;
+    tl.appendChild(el);
+  });
+  bindBeats();
+}
+function bindBeats() {
+  let dragEl = null;
+  $$(".beat").forEach(el => {
+    el.addEventListener("dragstart", () => { dragEl = el; el.classList.add("dragging"); });
+    el.addEventListener("dragend",   () => { el.classList.remove("dragging"); persistBeatOrder(); });
+    el.addEventListener("dragover", e => {
+      e.preventDefault();
+      const after = getDragAfter($("#timeline"), e.clientY);
+      if (after == null) $("#timeline").appendChild(dragEl);
+      else $("#timeline").insertBefore(dragEl, after);
+    });
+  });
+  $$(".beat input").forEach(inp => inp.addEventListener("input", e => {
+    const b = bible.beats.find(x => x.id == e.target.dataset.id); if (b) { b.text = e.target.value; save(); }
+  }));
+  $$(".beat .reveal").forEach(r => r.addEventListener("click", e => {
+    const b = bible.beats.find(x => x.id == e.target.dataset.id);
+    if (b) { b.reveal = (b.reveal+1)%3; e.target.textContent = REVEALS[b.reveal]; save(); recompute(); }
+  }));
+}
+function getDragAfter(container, y) {
+  const els = [...container.querySelectorAll(".beat:not(.dragging)")];
+  return els.reduce((closest, child) => {
+    const box = child.getBoundingClientRect(); const offset = y - box.top - box.height/2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: child };
+    return closest;
+  }, { offset: -Infinity }).element;
+}
+function persistBeatOrder() {
+  const ids = $$(".beat").map(el => el.dataset.id);
+  bible.beats.sort((a,b) => ids.indexOf(String(a.id)) - ids.indexOf(String(b.id)));
+  save(); renderTimeline(); recompute();
+}
+$("#save2").addEventListener("click", () => { toast("Blueprint locked. Revelation ≠ chronology."); goChamber(3); });
+
+/* ===================== PHASE 3 — THE DESK ===================== */
+$("#manuscript").addEventListener("input", e => { bible.manuscript = e.target.value; save(); recompute(); });
+$("#check3").addEventListener("click", auditCoherence);
+$("#save3").addEventListener("click", () => { toast("Passage saved to the Bible."); });
+
+/* The Coherence engine — the heart of the "designed absurdity" promise.
+   Heuristic, local, explainable. (The Muse can deepen this with a real model.) */
+function auditCoherence() {
+  const text = bible.manuscript.toLowerCase();
+  const notes = [];
+  if (!text.trim()) { $("#audit-out").textContent = "Write a passage first — the desk needs prose to audit."; return; }
+
+  // 1. Does the prose echo the paradox's key nouns?
+  const anchorWords = keyWords(bible.paradox);
+  const hits = anchorWords.filter(w => text.includes(w));
+  notes.push(`◈ Paradox resonance: ${hits.length}/${anchorWords.length} anchor concepts surfaced${hits.length?` (${hits.join(", ")})`:""}.`);
+
+  // 2. Are the declared rules respected / referenced?
+  if (bible.rules.length) {
+    bible.rules.forEach(r => {
+      const rw = keyWords(r);
+      const touched = rw.some(w => text.includes(w));
+      notes.push(`${touched ? "✓" : "⚠"} Rule "${truncate(r,42)}" ${touched ? "is in play" : "is not reflected here"}.`);
+    });
+  } else {
+    notes.push("⚠ No rules declared yet — add rules of the anomaly (right panel) so coherence is measurable, not vibes.");
+  }
+
+  // 3. Sensory disorientation present? (Phase 3 craft check)
+  const senses = ["smell","taste","sound","cold","warm","light","dark","echo","silence","touch"];
+  const senseHits = senses.filter(s => text.includes(s)).length;
+  notes.push(`◈ Sensory grounding: ${senseHits} sense-anchors — ${senseHits>=3?"immersive":"consider more to make the break *felt*"}.`);
+
+  $("#audit-out").textContent = notes.join("\n");
+  recompute();
+}
+
+/* ===================== PHASE 4 — LAUNCH ===================== */
+["f-blurb","f-cover","f-keywords"].forEach(id => {
+  $("#"+id).addEventListener("input", e => { bible[id.replace("f-","")] = e.target.value; save(); recompute(); });
+});
+$("#save4").addEventListener("click", () => { toast("Labyrinth sealed. Export your Bible from the rail ⬇"); });
+
+/* ===================== RULES OF THE ANOMALY ===================== */
+$("#rule-input").addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.value.trim()) {
+    bible.rules.push(e.target.value.trim()); e.target.value = "";
+    save(); renderBible(); recompute();
+  }
+});
+
+/* ===================== COHERENCE SCORE (holistic) ===================== */
+function recompute() {
+  let score = 0;
+  if (bible.paradox.trim().length > 20) score += 25;
+  if (bible.theme.trim().length > 10) score += 15;
+  if (bible.unreliable.length) score += 10;
+  if (bible.rules.length) score += Math.min(20, bible.rules.length * 7);
+  if (bible.beats.length >= 3) score += 10;
+  if (bible.beats.some(b => b.reveal !== 0)) score += 5; // non-linear revelation used
+  // prose-vs-rules bonus
+  if (bible.manuscript.trim() && bible.rules.length) {
+    const t = bible.manuscript.toLowerCase();
+    const respected = bible.rules.filter(r => keyWords(r).some(w => t.includes(w))).length;
+    score += Math.min(15, respected * 5);
+  }
+  bible.coherence = Math.min(100, score); save();
+  $("#coh-fill").style.width = bible.coherence + "%";
+  $("#coh-pct").textContent = bible.coherence + "%";
+}
+
+/* ===================== THE MUSE (BYO key, optional) ===================== */
+$("#ai-go").addEventListener("click", consultMuse);
+async function consultMuse() {
+  const provider = $("#ai-provider").value;
+  const key = $("#ai-key").value.trim();
+  const task = $("#ai-task").value;
+  const out = $("#ai-out");
+  if (!key) { out.textContent = "Paste your API key first. It stays in this browser."; return; }
+  out.textContent = "The Muse is thinking…";
+  const prompt = musePrompt(task);
+  try {
+    const text = await callProvider(provider, key, prompt);
+    out.textContent = text.trim();
+  } catch (err) {
+    out.textContent = "⚠ " + err.message;
+  }
+}
+function musePrompt(task) {
+  const ctx = `GENRE: ${bible.genre}\nPARADOX: ${bible.paradox||"(none yet)"}\nTHEME: ${bible.theme||"(none)"}\n`
+    + `UNRELIABILITY: ${bible.unreliable.join(", ")||"(none)"}\nRULES: ${bible.rules.join(" | ")||"(none)"}\n`
+    + `BEATS: ${bible.beats.map(b=>b.text).join(" → ")||"(none)"}`;
+  const asks = {
+    paradox: "Propose ONE sharper, more unresolvable central paradox that fits this world. Explain in 2 sentences why it bends reality.",
+    beats: "Propose 5 non-linear story beats and, for each, mark when the reader should truly understand it (hidden/hinted/revealed).",
+    dialogue: "Write a 12-line dialogue of doubt between two characters that conveys unease, not information. No stage directions beyond speaker names.",
+    blurb: "Write a 150-word back-cover blurb that tantalizes and ends on an unanswerable question. No spoilers.",
+    cover: "Give 3 abstract, symbolic cover concepts (palette, motif, mood). No literal scene depictions.",
+  };
+  return `You are Vyasa, a master architect of mind-bending fiction. Using this Story Bible, ${asks[task]}\n\n---\n${ctx}`;
+}
+/* Raw provider calls — same shape Om uses; keys never leave the browser except to the provider. */
+async function callProvider(provider, key, prompt) {
+  if (provider === "gemini") {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+    const r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ contents:[{role:"user",parts:[{text:prompt}]}], generationConfig:{temperature:0.9} }) });
+    if (!r.ok) throw new Error(`Gemini ${r.status}: ${(await r.text()).slice(0,120)}`);
+    const d = await r.json();
+    return d.candidates?.[0]?.content?.parts?.map(p=>p.text).join("") || "(no response)";
+  } else {
+    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", { method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},
+      body: JSON.stringify({ model:"llama-3.3-70b-versatile", temperature:0.9,
+        messages:[{role:"user",content:prompt}] }) });
+    if (!r.ok) throw new Error(`Groq ${r.status}: ${(await r.text()).slice(0,120)}`);
+    const d = await r.json();
+    return d.choices?.[0]?.message?.content || "(no response)";
+  }
+}
+
+/* ===================== BIBLE RENDER ===================== */
+function renderBible() {
+  const v = GENRE_VOICE[bible.genre] || GENRE_VOICE.void;
+  $("#bible-title").textContent = v.title;
+  setV("#b-paradox", bible.paradox, "Not yet forged.");
+  setV("#b-theme", bible.theme, "—");
+  setV("#b-unreliable", bible.unreliable.join(" · "), "—");
+  $("#b-beats").textContent = bible.beats.length;
+  const rl = $("#b-rules"); rl.innerHTML = "";
+  bible.rules.forEach((r, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span>${escapeHtml(r)}</span><span class="x" data-i="${i}">✕</span>`;
+    rl.appendChild(li);
+  });
+  $$("#b-rules .x").forEach(x => x.addEventListener("click", e => {
+    bible.rules.splice(+e.target.dataset.i, 1); save(); renderBible(); recompute();
+  }));
+  if (bible.coherence === 0) $("#coh-note").textContent = v.coh;
+  else $("#coh-note").textContent = cohNote(bible.coherence);
+}
+function setV(sel, val, empty) {
+  const el = $(sel);
+  if (val && val.trim()) { el.textContent = val; el.classList.remove("empty"); }
+  else { el.textContent = empty; el.classList.add("empty"); }
+}
+function cohNote(c) {
+  if (c < 30) return "Fragile. The illusion has nothing to stand on yet.";
+  if (c < 60) return "Taking shape. Add rules & non-linear reveals to deepen the maze.";
+  if (c < 85) return "Structurally sound. The absurdity is becoming designed.";
+  return "Airtight labyrinth. The reader will be lost; you are not.";
+}
+
+/* ===================== RAIL ACTIONS ===================== */
+$("#reskin").addEventListener("click", () => {
+  $("#app").classList.remove("live"); $("#threshold").style.display = "flex";
+  requestAnimationFrame(() => $("#threshold").classList.remove("gone"));
+});
+$("#export").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(bible, null, 2)], {type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = (bible.title||"vyasa-story-bible").replace(/\s+/g,"_") + ".json"; a.click();
+  toast("Story Bible exported.");
+});
+$("#wipe").addEventListener("click", () => {
+  if (confirm("Reset the entire labyrinth? This clears your Story Bible.")) {
+    bible = defaultBible(); save(); location.reload();
+  }
+});
+
+/* ===================== HELPERS ===================== */
+function goChamber(n) { $(`.chamber-btn[data-c="${n}"]`).click(); }
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 2600); }
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function truncate(s,n){ return s.length>n ? s.slice(0,n)+"…" : s; }
+function keyWords(s){ return (s.toLowerCase().match(/\b[a-z]{4,}\b/g)||[]).filter(w=>!STOP.has(w)).slice(0,8); }
+const STOP = new Set(["that","this","with","from","they","their","them","what","when","where","which","would","could","about","into","then","than","have","been","were","will","your","yours"]);
+
+/* ===================== HYDRATE FROM SAVED STATE ===================== */
+function hydrate() {
+  $("#f-title").value = bible.title;
+  $("#f-paradox").value = bible.paradox;
+  $("#f-theme").value = bible.theme;
+  $("#manuscript").value = bible.manuscript;
+  $("#f-blurb").value = bible.blurb;
+  $("#f-cover").value = bible.cover;
+  $("#f-keywords").value = bible.keywords;
+  $$("#f-unreliable .chip").forEach(c => { if (bible.unreliable.includes(c.dataset.v)) c.classList.add("on"); });
+  renderTimeline(); renderBible(); recompute();
+}
+
+/* If a world was already chosen in a past session, skip the threshold. */
+if (bible.genre && bible.genre !== "void") {
+  document.documentElement.dataset.genre = bible.genre;
+  $("#threshold").classList.add("gone"); $("#threshold").style.display = "none";
+  $("#app").classList.add("live"); hydrate();
+}
+</script>
+</body>
+</html>

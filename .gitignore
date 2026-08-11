@@ -1,0 +1,17 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local server logs / temp
+*.log
+
+# Exported user bibles (personal data — don't commit)
+*-story-bible.json
+vyasa-story-bible.json
