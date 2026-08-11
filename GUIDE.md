@@ -145,7 +145,32 @@ it's automatic.
 
 *(Phase I: The Genesis of Disorientation)*
 
-This is where you forge the **seed** of your story. Four things to fill in:
+This is where you forge the **seed** of your story.
+
+### ✨ Shortcut: Begin from a Logline (optional)
+
+At the very top of Genesis is a **"Begin from a Logline"** box. If you have even a
+one-sentence idea, this is the fastest way to start:
+
+1. Type your **logline** — one sentence. *e.g. "A grieving architect discovers the city
+   she's designing is a prison built from her own suppressed memories."*
+2. Click **"✦ Reveal the Synopsis."** Vyasa (using your Muse key) imagines a whole
+   *bible-to-be*: a springboard synopsis, a possible central paradox, theme, canon
+   characters, rules, and beats — shown to you as **inspiration**. Nothing is saved yet.
+3. If you like the direction, click **"🏛 Build the Bible from this →"** and Vyasa
+   **fills in the fields for you** — paradox, theme, unreliability, Canon Ledger, Rules,
+   and the Map's beats.
+4. Don't like it? Click **"↻ Imagine another"** for a fresh take.
+
+**This is completely optional and non-destructive:**
+- It needs your **Muse key** (Story Bible → The Muse). Without a key, just fill the
+  fields manually as described below.
+- If your Bible already has content, Building **asks first** — it can either fill only
+  the empty fields (keeping your work) or overwrite the core fields. Your call.
+- **Everything it generates is a draft you then edit.** It's a starting point to open
+  your imagination, not a finished story. You remain the architect.
+
+Prefer to start from scratch? Ignore that box entirely and fill in the four fields below.
 
 ### Working Title
 Just a name for now. Change it anytime.

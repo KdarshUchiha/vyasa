@@ -163,6 +163,23 @@ body::after {
 .stage h2 { font-family: var(--font-head); font-size: 2rem; margin: .3rem 0 .2rem; font-weight: 400; transform: skew(var(--skew)); }
 .stage .sub { color: var(--ink-soft); margin-bottom: 1.8rem; font-size: .95rem; line-height: 1.5; }
 
+/* Genesis-from-a-logline "conjure" block */
+.conjure { border: 1px solid var(--line); border-radius: 14px; padding: 1.2rem 1.3rem; margin-bottom: 2rem;
+  background: radial-gradient(600px 300px at 85% -40%, var(--bg-2), var(--panel)); position: relative; overflow: hidden; }
+.conjure-head { display: flex; align-items: flex-start; gap: .8rem; margin-bottom: .9rem; }
+.conjure-glyph { font-size: 1.6rem; filter: drop-shadow(var(--glow)); line-height: 1; }
+.conjure-title { font-family: var(--font-head); font-size: 1.15rem; letter-spacing: .04em; }
+.conjure-sub { color: var(--ink-soft); font-size: .82rem; margin-top: .2rem; line-height: 1.4; }
+.conjure textarea { min-height: 70px; }
+.conjure-btns { display: flex; align-items: center; gap: .8rem; margin-top: .8rem; flex-wrap: wrap; }
+.conjure-note { color: var(--ink-soft); font-size: .72rem; opacity: .8; font-style: italic; }
+.synopsis-panel { margin-top: 1.1rem; border-top: 1px solid var(--line); padding-top: 1rem; animation: rise .5s; }
+.synopsis-body { font-size: .92rem; line-height: 1.6; white-space: pre-wrap; color: var(--ink); }
+.synopsis-body .syn-seg { margin-bottom: .8rem; }
+.synopsis-body .syn-k { color: var(--accent); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; display: block; margin-bottom: .2rem; }
+.synopsis-loading { color: var(--ink-soft); font-style: italic; display: flex; align-items: center; gap: .5rem; }
+.synopsis-loading::before { content: "🌀"; animation: spin 1.4s linear infinite; display: inline-block; }
+
 .field { margin-bottom: 1.5rem; }
 .field label { display: block; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-soft); margin-bottom: .5rem; }
@@ -412,6 +429,29 @@ textarea { min-height: 96px; line-height: 1.55; }
       <h2>The Central Paradox</h2>
       <p class="sub">This is the fulcrum on which reality bends — the one unresolvable contradiction your whole story orbits. Define it, and everything downstream inherits its logic.</p>
 
+      <!-- GENESIS FROM A LOGLINE — Muse-powered springboard -->
+      <div class="conjure">
+        <div class="conjure-head">
+          <span class="conjure-glyph">🌀</span>
+          <div>
+            <div class="conjure-title">Begin from a Logline</div>
+            <div class="conjure-sub">One sentence in — a whole labyrinth out. Vyasa reads your seed and imagines the bible-to-be.</div>
+          </div>
+        </div>
+        <textarea id="f-logline" placeholder="e.g. A grieving architect discovers the city she is designing is a prison built from her own suppressed memories."></textarea>
+        <div class="conjure-btns">
+          <button class="btn" id="reveal-synopsis">✦ Reveal the Synopsis</button>
+          <span class="conjure-note" id="conjure-note">Uses your Muse key (Story Bible → The Muse). Nothing is written until you choose to build.</span>
+        </div>
+        <div id="synopsis-panel" class="synopsis-panel" style="display:none">
+          <div class="synopsis-body" id="synopsis-body"></div>
+          <div class="conjure-btns" id="synopsis-actions" style="display:none">
+            <button class="btn" id="build-bible">🏛 Build the Bible from this →</button>
+            <button class="btn ghost" id="reveal-synopsis-again">↻ Imagine another</button>
+          </div>
+        </div>
+      </div>
+
       <div class="field">
         <label>Working Title</label>
         <input type="text" id="f-title" placeholder="Untitled labyrinth…" />
@@ -597,7 +637,7 @@ const LS_KEY = "vyasa.bible.v1";
    contradictions: [{ id, sig, msg, severity, status }]  — the alarm log
 */
 const defaultBible = () => ({
-  genre: "void", title: "", paradox: "", theme: "",
+  genre: "void", title: "", logline: "", paradox: "", theme: "",
   unreliable: [], rules: [], canon: [], contradictions: [],
   beats: [], manuscript: "",
   blurb: "", cover: "", keywords: "", coherence: 0,
@@ -672,6 +712,163 @@ $$("#f-unreliable .chip").forEach(chip => {
   });
 });
 $("#save1").addEventListener("click", () => { toast("Paradox anchored. The world now inherits its logic."); goChamber(2); });
+
+/* ===================== GENESIS FROM A LOGLINE (two stages) ===================== */
+/* Stage 1: logline → a human-readable SYNOPSIS of the bible-to-be (inspiration).
+   Stage 2: that same idea → structured JSON that POPULATES the fields (build).
+   Both use the Muse key. Building is non-destructive: it never overwrites fields
+   you've already filled unless you confirm. Manual entry always still works. */
+let lastConjured = null;  // holds the structured bible draft from stage 1
+
+$("#f-logline").addEventListener("input", e => { bible.logline = e.target.value; save(); });
+$("#reveal-synopsis").addEventListener("click", revealSynopsis);
+$("#reveal-synopsis-again").addEventListener("click", revealSynopsis);
+$("#build-bible").addEventListener("click", buildFromSynopsis);
+
+async function revealSynopsis() {
+  const logline = ($("#f-logline").value || "").trim();
+  if (!logline) { toast("Type a logline first — one sentence is enough."); return; }
+  const key = ($("#ai-key").value || "").trim();
+  if (!key) { toast("Add your Muse key first (Story Bible → The Muse)."); flashMuse(); return; }
+
+  bible.logline = logline; save();
+  $("#synopsis-panel").style.display = "block";
+  $("#synopsis-actions").style.display = "none";
+  $("#synopsis-body").innerHTML = `<span class="synopsis-loading">Vyasa is imagining the labyrinth…</span>`;
+
+  try {
+    lastConjured = await conjureBible(logline);
+    $("#synopsis-body").innerHTML = renderSynopsis(lastConjured);
+    $("#synopsis-actions").style.display = "flex";
+  } catch (err) {
+    $("#synopsis-body").innerHTML = `<span style="color:var(--accent-2)">⚠ ${escapeHtml(err.message)}</span>`;
+  }
+}
+
+/* Ask the Muse for a STRUCTURED bible draft. Strict JSON so we can both render a
+   synopsis AND populate fields from the same object. */
+async function conjureBible(logline) {
+  const provider = $("#ai-provider").value;
+  const key = $("#ai-key").value.trim();
+  const genre = bible.genre || "any";
+  const prompt =
+`You are Vyasa, a master architect of mind-bending fiction (think Nolan, Blake Crouch, VanderMeer). A ${genre} writer gives you a LOGLINE. Design the seed of a Story Bible for a mind-bending story.
+
+Return STRICT JSON only, no prose outside it, in EXACTLY this shape:
+{
+  "title": "<evocative working title>",
+  "synopsis": "<2-3 paragraph springboard synopsis that opens the writer's imagination — what the story could become, its mood, its central mystery. Inspiring, not prescriptive.>",
+  "paradox": "<one unresolvable central paradox / impossible premise — a warp in reality, not a plot summary>",
+  "theme": "<the human/philosophical question underneath, one sentence>",
+  "unreliable": ["<1-2 from: Memory-gapped narrator, Shifting environment, Contradictory sources, Fractured timeline, Hallucination, Deliberate deception>"],
+  "canon": [ {"name":"<entity>","type":"<character|place|object|fact|timeline>","facts":["<fact>","<fact>"]} ],
+  "rules": [ {"text":"<a law of the anomaly>","trigger":"<when it applies, few words>","limit":"<what it forbids/requires, few words>"} ],
+  "beats": [ {"text":"<a story beat>","reveal":"<hidden|hinted|revealed>"} ]
+}
+Give 2-3 canon entities, 2-3 rules, and 5-6 beats. Keep it consistent with itself.
+
+LOGLINE: "${logline}"`;
+  const raw = await callProvider(provider, key, prompt);
+  const json = extractJson(raw);
+  if (!json) throw new Error("The Muse's reply couldn't be parsed. Try again, or rephrase the logline.");
+  return normalizeConjured(json);
+}
+
+/* Defensive normalisation — models drift from the schema; keep only valid shapes. */
+function normalizeConjured(j) {
+  const UNREL = ["Memory-gapped narrator","Shifting environment","Contradictory sources","Fractured timeline","Hallucination","Deliberate deception"];
+  const REV = ["hidden","hinted","revealed"];
+  const arr = x => Array.isArray(x) ? x : [];
+  return {
+    title: str(j.title),
+    synopsis: str(j.synopsis),
+    paradox: str(j.paradox),
+    theme: str(j.theme),
+    unreliable: arr(j.unreliable).map(str).filter(u => UNREL.includes(u)).slice(0, 2),
+    canon: arr(j.canon).map(e => ({
+      name: str(e && e.name) || "Unnamed",
+      type: ["character","place","object","fact","timeline"].includes(str(e && e.type)) ? str(e.type) : "character",
+      facts: arr(e && e.facts).map(str).filter(Boolean).slice(0, 6),
+    })).filter(e => e.name).slice(0, 5),
+    rules: arr(j.rules).map(r => ({
+      text: str(r && r.text), trigger: str(r && r.trigger), limit: str(r && r.limit),
+    })).filter(r => r.text).slice(0, 5),
+    beats: arr(j.beats).map(b => ({
+      text: str(b && b.text),
+      reveal: Math.max(0, REV.indexOf(["hidden","hinted","revealed"].includes(str(b && b.reveal)) ? str(b.reveal) : "hidden")),
+    })).filter(b => b.text).slice(0, 8),
+  };
+  function str(x){ return (typeof x === "string" ? x : (x == null ? "" : String(x))).trim(); }
+}
+
+function renderSynopsis(c) {
+  const seg = (k, v) => v ? `<div class="syn-seg"><span class="syn-k">${k}</span>${escapeHtml(v)}</div>` : "";
+  const list = (k, items) => items.length ? `<div class="syn-seg"><span class="syn-k">${k}</span>${escapeHtml(items.join(" · "))}</div>` : "";
+  return (
+    seg("Working Title", c.title) +
+    seg("Synopsis", c.synopsis) +
+    seg("Central Paradox", c.paradox) +
+    seg("Theme", c.theme) +
+    list("Unreliability", c.unreliable) +
+    list("Canon", c.canon.map(e => `${e.name} (${e.type})`)) +
+    list("Rules", c.rules.map(r => r.text)) +
+    (c.beats.length ? `<div class="syn-seg"><span class="syn-k">Beats</span>${escapeHtml(c.beats.map(b=>b.text).join("  →  "))}</div>` : "")
+  );
+}
+
+/* Stage 2 — populate the Bible from the conjured draft. Non-destructive: fills
+   only empty fields unless the writer confirms an overwrite. */
+function buildFromSynopsis() {
+  if (!lastConjured) return;
+  const c = lastConjured;
+  const hasExisting = bible.paradox.trim() || bible.theme.trim() || bible.canon.length || bible.rules.length || bible.beats.length;
+  let overwrite = false;
+  if (hasExisting) {
+    overwrite = confirm(
+      "Your Bible already has content.\n\n" +
+      "• OK = Overwrite the core fields with this conjured draft.\n" +
+      "• Cancel = Keep what you have; only fill empty fields and ADD new canon/rules/beats."
+    );
+  }
+
+  // Scalars: fill-if-empty, or overwrite when confirmed.
+  const setScalar = (field, val) => { if (val && (overwrite || !bible[field].trim())) bible[field] = val; };
+  setScalar("title", c.title);
+  setScalar("paradox", c.paradox);
+  setScalar("theme", c.theme);
+  if (c.unreliable.length && (overwrite || !bible.unreliable.length)) bible.unreliable = c.unreliable.slice(0, 2);
+
+  // Collections: on overwrite, replace; otherwise append (deduped by text/name).
+  if (overwrite) { bible.canon = []; bible.rules = []; bible.beats = []; }
+  c.canon.forEach(e => {
+    if (!bible.canon.some(x => x.name.toLowerCase() === e.name.toLowerCase())) {
+      bible.canon.push({ id: uid(), name: e.name, type: e.type, facts: e.facts.map(t => ({ id: uid(), text: t })) });
+    }
+  });
+  c.rules.forEach(r => {
+    if (!bible.rules.some(x => x.text.toLowerCase() === r.text.toLowerCase())) {
+      bible.rules.push({ id: uid(), text: r.text, trigger: r.trigger, limit: r.limit });
+    }
+  });
+  c.beats.forEach(b => {
+    if (!bible.beats.some(x => x.text.toLowerCase() === b.text.toLowerCase())) {
+      bible.beats.push({ id: uid(), text: b.text, reveal: b.reveal });
+    }
+  });
+
+  save();
+  hydrate();               // re-fill all inputs from the updated bible
+  renderContradictions();
+  toast("🏛 Bible drafted. Every field is yours to sharpen or overwrite.");
+  $("#synopsis-panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* Briefly draw the eye to the Muse key field when it's missing. */
+function flashMuse() {
+  const el = $("#ai-key"); if (!el) return;
+  el.style.transition = "box-shadow .3s"; el.style.boxShadow = "var(--glow)";
+  setTimeout(() => { el.style.boxShadow = ""; }, 1400);
+}
 
 /* ===================== PHASE 2 — THE MAP ===================== */
 const REVEALS = ["hidden", "hinted", "revealed"];
@@ -1201,13 +1398,14 @@ function hashStr(s){ let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charC
 /* ===================== HYDRATE FROM SAVED STATE ===================== */
 function hydrate() {
   $("#f-title").value = bible.title;
+  $("#f-logline").value = bible.logline || "";
   $("#f-paradox").value = bible.paradox;
   $("#f-theme").value = bible.theme;
   $("#manuscript").value = bible.manuscript;
   $("#f-blurb").value = bible.blurb;
   $("#f-cover").value = bible.cover;
   $("#f-keywords").value = bible.keywords;
-  $$("#f-unreliable .chip").forEach(c => { if (bible.unreliable.includes(c.dataset.v)) c.classList.add("on"); });
+  $$("#f-unreliable .chip").forEach(c => c.classList.toggle("on", bible.unreliable.includes(c.dataset.v)));
   renderTimeline(); renderBible(); renderContradictions(); recompute();
 }
 
