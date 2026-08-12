@@ -1790,14 +1790,14 @@ function detectContradictions(text, scene) {
   ];
 
   // (A) CANON FACT violations: a tracked fact asserts one pole; the prose asserts the other.
+  //     Uses WHOLE-WORD matching so "night" doesn't match inside "midnight", etc.
   bible.canon.forEach(ent => {
-    const nameHit = ent.name && lower.includes(ent.name.toLowerCase());
     (ent.facts || []).forEach(fact => {
       const fl = (fact.text || "").toLowerCase();
       OPP.forEach(([a, b]) => {
-        const factHasA = fl.includes(a), factHasB = fl.includes(b);
+        const factHasA = hasPhrase(fl, a), factHasB = hasPhrase(fl, b);
         if (!factHasA && !factHasB) return;
-        const proseHasA = lower.includes(a), proseHasB = lower.includes(b);
+        const proseHasA = hasPhrase(lower, a), proseHasB = hasPhrase(lower, b);
         const clash = (factHasA && proseHasB) || (factHasB && proseHasA);
         if (clash) {
           const proseSide = factHasA ? b : a;   // the wrong term the prose used
@@ -1822,47 +1822,50 @@ function detectContradictions(text, scene) {
     });
   });
 
-  // (B) RULE LIMIT violations: the rule's TRIGGER concept appears, but the prose
-  //     also contains a phrase that breaches the stated LIMIT.
+  // (B) RULE LIMIT violations: flag ONLY when the rule's trigger appears AND the prose
+  //     shows an actual breach signal near the limit — a negation/exception word next to
+  //     a limit term ("never … erased", "without … midnight"). Merely mentioning a
+  //     trigger word is NOT a contradiction (that was the old false-positive firehose).
+  // Explicit breach verbs only (whole-word). Generic negations like "not"/"never"/"nothing"
+  // are excluded — they saturate literary prose and produced dozens of false positives.
+  const BREACH = ["undo","undone","reverse","reversed","unmake","unmade","erase","erased","break the rule","broke the rule","broken the rule","violate","violated","defy","defied","ignore the","ignored the","against the rule"];
   bible.rules.forEach(rule => {
-    if (!rule.trigger && !rule.limit) return;
     const trig = keyList(rule.trigger);
     const lim  = keyList(rule.limit);
-    const triggered = trig.length && trig.some(w => lower.includes(w));
-    // naive breach: prose negates the limit ("never/only/cannot" + limit word nearby)
-    const breachWords = ["never","cannot","can't","only","impossible","without","no longer","forbidden"];
-    const limitTouched = lim.length && lim.some(w => lower.includes(w));
-    if (triggered && limitTouched) {
-      const negatedNearLimit = breachWords.some(bw => {
-        const i = lower.indexOf(bw);
-        return i >= 0 && lim.some(w => Math.abs(lower.indexOf(w) - i) < 80);
-      });
-      // If the limit is stated as an absolute ("only at death") and the prose shows
-      // the triggered event WITHOUT the limiting condition, flag it as soft.
-      out.push({
-        sig: `rule:${rule.id}`,
-        severity: negatedNearLimit ? "soft" : "soft",
-        source: "rule",
-        msg: `Rule in play: “${truncate(rule.text,60)}.” Its trigger appears here — confirm the limit (“${truncate(rule.limit||"—",40)}”) still holds.`,
-        where: firstSentenceWith(sentences, trig[0] || ""),
-      });
+    if (!trig.length || !lim.length) return;
+    // A breach must live in ONE sentence: that sentence must contain a trigger word,
+    // a limit word, AND an explicit breach verb. Three-way co-occurrence, same sentence.
+    for (const sent of sentences) {
+      const sl = sent.toLowerCase();
+      const hasTrig = trig.some(w => hasWord(sl, w));
+      const hasLim = lim.some(w => hasWord(sl, w));
+      const hasBreach = BREACH.some(bw => sl.includes(bw));
+      if (hasTrig && hasLim && hasBreach) {
+        out.push({
+          sig: `rule:${rule.id}`,
+          severity: "soft",
+          source: "rule",
+          msg: `Possible rule breach: “${truncate(rule.text,60)}” — its limit (“${truncate(rule.limit||"—",40)}”) may be crossed here. Confirm it's intentional.`,
+          where: sent.trim(),
+        });
+        break;   // one flag per rule per scene is enough
+      }
     }
   });
 
   // (C) Internal antonym clash WITHIN the passage (same subject, opposite states).
+  //     Whole-word only, and only when the two poles sit VERY close (same clause-ish),
+  //     so ordinary literary use of "day"/"night" across a chapter isn't flagged.
   OPP.forEach(([a, b]) => {
-    if (lower.includes(a) && lower.includes(b)) {
-      // Only flag if reasonably close — likely the same referent, not two people.
-      const ia = lower.indexOf(a), ib = lower.indexOf(b);
-      if (Math.abs(ia - ib) < 220) {
-        out.push({
-          sig: `inline:${a}|${b}`,
-          severity: "soft",
-          source: "prose",
-          msg: `This passage holds both “${a}” and “${b}” close together — intentional paradox, or a slip?`,
-          where: firstSentenceWith(sentences, a),
-        });
-      }
+    const ia = wordIndex(lower, a), ib = wordIndex(lower, b);
+    if (ia >= 0 && ib >= 0 && Math.abs(ia - ib) < 60) {
+      out.push({
+        sig: `inline:${a}|${b}`,
+        severity: "soft",
+        source: "prose",
+        msg: `This passage holds both “${a}” and “${b}” very close together — intentional paradox, or a slip?`,
+        where: firstSentenceWith(sentences, a),
+      });
     }
   });
 
@@ -3008,6 +3011,13 @@ function keyWords(s){ return ((s||"").toLowerCase().match(/\b[a-z]{4,}\b/g)||[])
 const STOP = new Set(["that","this","with","from","they","their","them","what","when","where","which","would","could","about","into","then","than","have","been","were","will","your","yours"]);
 /* keyList — like keyWords but keeps 3+ letter words and no cap; for triggers/limits. */
 function keyList(s){ return ((s||"").toLowerCase().match(/\b[a-z]{3,}\b/g)||[]).filter(w=>!STOP.has(w)); }
+/* Whole-word / whole-phrase matching so "night" ≠ "midnight" and "day" ≠ "yesterday".
+   Word boundaries are enforced on each side; multi-word phrases ("left hand") are matched
+   as a unit with boundaries at the outer ends. */
+function phraseRegex(phrase){ return new RegExp("(^|[^a-z0-9-])" + escapeRegex(phrase.toLowerCase()) + "(?![a-z0-9-])", "i"); }
+function hasPhrase(hay, phrase){ return phraseRegex(phrase).test(hay || ""); }
+function hasWord(hay, word){ return new RegExp("\\b" + escapeRegex(word.toLowerCase()) + "\\b", "i").test(hay || ""); }
+function wordIndex(hay, word){ const m = (hay||"").match(new RegExp("\\b" + escapeRegex(word.toLowerCase()) + "\\b", "i")); return m ? m.index : -1; }
 /* firstSentenceWith — return the first sentence containing a phrase, for "where" context. */
 function firstSentenceWith(sentences, phrase){
   if(!phrase) return "";
