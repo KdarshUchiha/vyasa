@@ -409,20 +409,36 @@ catches subtle issues the instant offline scan can't.
 
 ---
 
-## 12. Saving, exporting & starting over
+## 12. Saving, the Vault & starting over
 
 - **Saving:** Automatic. Every keystroke is saved to your browser's local storage.
+- **The Vault (🛡 in the left rail):** your safety net and time machine — see below.
 - **Exporting (⬇ in the left rail):** Downloads your entire Story Bible as a `.json`
-  file. **Do this to back up your work or move it to another computer.** Keep this file
-  safe — it's your whole story's brain in one document.
+  file. **Do this to back up your work or move it to another computer.**
 - **Changing world (🎚️):** Returns you to the Threshold to pick a different genre skin.
   Your work is kept.
-- **Reset (⟲):** ⚠️ **Wipes everything** and starts fresh. It asks for confirmation.
-  Export first if you might want your work back.
+- **Reset (⟲):** ⚠️ **Wipes the current Bible** and starts fresh (asks first). Your Vault
+  snapshots are kept, so you can restore afterwards.
 
-> ⚠️ **The one risk to know about:** because your work lives in the browser, clearing
-> your browser data / cache, or using "private/incognito" mode, can erase it. **Export
-> regularly** — treat the `.json` file as your real save file.
+### 🛡 The Vault — snapshots, backups & time travel
+
+Open it from the **🛡** button in the left rail. Inside:
+
+- **📸 Snapshot Now** — saves a named copy of your entire Story Bible. Take one before
+  any big change (a rewrite, a risky restructure) so you can always come back.
+- **Restore** — roll any snapshot back into the app. Restoring **auto-snapshots your
+  current work first**, so it's always reversible — you can never paint yourself into a
+  corner.
+- **Autosaves** — Vyasa quietly keeps your recent states (a rolling set) as a safety net,
+  even if you never take a manual snapshot. They appear in their own group.
+- **⬆ Import .json** — load a previously exported Bible back in (your current work is
+  auto-snapshotted first).
+- **Delete** — remove a snapshot you no longer need.
+
+> ⚠️ **Still export for real backups.** The Vault lives *in this browser*. Clearing your
+> browser data / cache, or using private/incognito mode, can erase both your Bible **and**
+> the Vault. For anything you'd hate to lose, **Export a `.json`** and keep it somewhere
+> safe — that file is your true, portable save.
 
 ---
 
