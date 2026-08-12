@@ -852,6 +852,23 @@ textarea { min-height: 96px; line-height: 1.55; }
           <button class="btn ghost" id="codex-json" title="Everything as a portable .json">⬇ Export Bible (.json)</button>
         </div>
       </div>
+
+      <!-- LAUNCH-READY BOOK -->
+      <div class="keystone-block">
+        <div class="ks-head"><span class="ks-glyph">📚</span><div>
+          <div class="ks-title">Publish the Book</div>
+          <div class="ks-sub">A reader-facing, launch-ready book — title page, copyright, linked contents, chapters, and back matter. Export a real EPUB for Kindle/KDP, Apple Books, or Kobo.</div>
+        </div></div>
+        <div class="book-meta">
+          <div class="field"><label>Author name (for the title page)</label>
+            <input type="text" id="f-author" placeholder="Your name" /></div>
+        </div>
+        <div class="ks-codex-btns">
+          <button class="btn" id="build-epub">📚 Export EPUB (.epub)</button>
+          <button class="btn ghost" id="build-book-html">📖 Launch-Ready Book (HTML)</button>
+        </div>
+        <div class="muted" id="book-note" style="margin-top:.6rem"></div>
+      </div>
     </section>
   </main>
 
@@ -983,7 +1000,7 @@ const LS_KEY = "vyasa.bible.v1";
    contradictions: [{ id, sig, msg, severity, status }]  — the alarm log
 */
 const defaultBible = () => ({
-  genre: "void", title: "", logline: "", paradox: "", theme: "",
+  genre: "void", title: "", author: "", logline: "", paradox: "", theme: "",
   unreliable: [], rules: [], canon: [], contradictions: [],
   beats: [],
   scenes: [], activeScene: null,   // manuscript is now a list of scenes
@@ -2185,6 +2202,288 @@ function buildCodex() {
   toast("📕 Codex bound — Print → Save as PDF to keep the whole labyrinth.");
 }
 
+/* ============================================================================
+   PUBLISH THE BOOK — a reader-facing, launch-ready book. Two outputs:
+   (1) Launch-Ready HTML: front matter + linked TOC + chapters + back matter.
+   (2) EPUB3: a valid .epub assembled in-browser (zero libraries) via a minimal
+       STORED-mode ZIP encoder with correct CRC-32.
+   ============================================================================ */
+$("#f-author").addEventListener("input", e => { bible.author = e.target.value; save(); });
+$("#build-book-html").addEventListener("click", buildBookHTML);
+$("#build-epub").addEventListener("click", buildEPUB);
+
+function bookChapters() {
+  // Reader-facing chapters = scenes with prose, in reader-order.
+  return bible.scenes.filter(s => (s.text || "").trim())
+    .map((s, i) => ({ title: s.title || `Chapter ${i + 1}`, text: s.text.trim(), n: i + 1 }));
+}
+function bookReady() {
+  const ch = bookChapters();
+  if (!ch.length) { $("#book-note").textContent = "⚠ No written scenes yet — write your manuscript at the Desk first."; return null; }
+  return ch;
+}
+
+/* ---- (1) Launch-Ready HTML book ---- */
+function buildBookHTML() {
+  const ch = bookReady(); if (!ch) return;
+  openPrintableHTML(assembleBookHTML(ch));
+  $("#book-note").textContent = "📖 Book opened in a new tab — Print → Save as PDF, or upload the HTML to KDP.";
+  toast("📖 Launch-ready book built.");
+}
+
+function assembleBookHTML(ch) {
+  const title = bible.title || "Untitled";
+  const author = bible.author || "Anonymous";
+  const year = new Date().getFullYear();
+  const toc = ch.map((c, i) => `<li><a href="#ch${i+1}">${escapeHtml(c.title)}</a></li>`).join("");
+  const chapters = ch.map((c, i) =>
+    `<section class="chapter" id="ch${i+1}"><h2>${escapeHtml(c.title)}</h2>\n${paras(c.text)}</section>`).join("\n");
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
+<style>${bookCSS()}</style></head><body>
+  <div class="print-hint">Launch-ready book. <b>Ctrl/Cmd+P → Save as PDF</b>, or export EPUB for Kindle. Close to return to Vyasa.</div>
+  <section class="frontmatter title-page">
+    <h1>${escapeHtml(title)}</h1>
+    ${bible.logline ? `<p class="tagline">${escapeHtml(bible.logline)}</p>` : ""}
+    <p class="byline">${escapeHtml(author)}</p>
+  </section>
+  <section class="frontmatter copyright">
+    <p>${escapeHtml(title)}</p>
+    <p>Copyright © ${year} ${escapeHtml(author)}. All rights reserved.</p>
+    <p>This is a work of fiction. Names, characters, and events are the product of the author's imagination.</p>
+    <p class="colophon">Built with Vyasa · The Architect's Table</p>
+  </section>
+  <section class="frontmatter toc">
+    <h2>Contents</h2>
+    <ol>${toc}</ol>
+  </section>
+  ${chapters}
+  ${bible.blurb ? `<section class="backmatter"><h2>About this book</h2>${paras(bible.blurb)}</section>` : ""}
+</body></html>`;
+}
+
+function bookCSS() {
+  return `
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { font-family: Georgia, "Times New Roman", serif; max-width: 40rem; margin: 0 auto;
+      padding: 3rem 2rem; line-height: 1.75; color: #1a1a1a; background: #fdfcf9; }
+    .frontmatter { page-break-after: always; text-align: center; }
+    .title-page { margin: 7rem 0; }
+    .title-page h1 { font-size: 3rem; font-weight: 400; letter-spacing: .04em; margin: 0 0 1rem; }
+    .title-page .tagline { font-style: italic; color: #555; max-width: 26rem; margin: 1.5rem auto; }
+    .title-page .byline { margin-top: 4rem; font-size: 1.1rem; letter-spacing: .08em; }
+    .copyright { font-size: .82rem; color: #555; margin: 6rem 0; line-height: 1.9; }
+    .copyright .colophon { margin-top: 2rem; letter-spacing: .1em; text-transform: uppercase; font-size: .7rem; color: #999; }
+    .toc { text-align: left; }
+    .toc h2, .chapter h2, .backmatter h2 { font-size: 1.6rem; font-weight: 400; }
+    .toc ol { line-height: 2.2; } .toc a { color: #1a1a1a; text-decoration: none; }
+    .chapter { page-break-before: always; }
+    .chapter h2 { margin: 2rem 0 1.5rem; letter-spacing: .02em; }
+    p { margin: 0 0 .2rem; text-indent: 1.6em; }
+    .chapter h2 + p, .backmatter h2 + p, .frontmatter p { text-indent: 0; }
+    .backmatter { page-break-before: always; }
+    .print-hint { position: fixed; top: 0; left: 0; right: 0; background: #1a1a1a; color: #fff;
+      text-align: center; padding: .6rem; font-family: sans-serif; font-size: .85rem; }
+    @media print { body { padding: 0; max-width: none; } .print-hint { display: none; } }
+  `;
+}
+
+/* ---- (2) EPUB3 export — assembled + zipped in the browser ---- */
+function buildEPUB() {
+  const ch = bookReady(); if (!ch) return;
+  const title = bible.title || "Untitled";
+  const author = bible.author || "Anonymous";
+  const uuid = "urn:uuid:" + pseudoUUID();
+  const xesc = s => escapeHtml(s);
+
+  // per-chapter XHTML
+  const chapterFiles = ch.map((c, i) => ({
+    name: `OEBPS/ch${i+1}.xhtml`,
+    data: strToU8(
+`<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en">
+<head><title>${xesc(c.title)}</title><link rel="stylesheet" type="text/css" href="style.css"/></head>
+<body><section epub:type="chapter"><h1>${xesc(c.title)}</h1>
+${paras(c.text)}
+</section></body></html>`)
+  }));
+
+  // title page
+  const titlePage =
+`<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><title>${xesc(title)}</title>
+<link rel="stylesheet" type="text/css" href="style.css"/></head>
+<body><section class="titlepage"><h1 class="booktitle">${xesc(title)}</h1>
+${bible.logline ? `<p class="tagline">${xesc(bible.logline)}</p>` : ""}
+<p class="byline">${xesc(author)}</p>
+<p class="colophon">Built with Vyasa</p></section></body></html>`;
+
+  // nav (EPUB3 table of contents)
+  const navItems = ch.map((c, i) => `<li><a href="ch${i+1}.xhtml">${xesc(c.title)}</a></li>`).join("");
+  const nav =
+`<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en">
+<head><title>Contents</title></head>
+<body><nav epub:type="toc" id="toc"><h1>Contents</h1><ol>${navItems}</ol></nav></body></html>`;
+
+  // OPF manifest + spine
+  const manifestItems = [
+    `<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>`,
+    `<item id="css" href="style.css" media-type="text/css"/>`,
+    `<item id="title" href="title.xhtml" media-type="application/xhtml+xml"/>`,
+    ...ch.map((c, i) => `<item id="ch${i+1}" href="ch${i+1}.xhtml" media-type="application/xhtml+xml"/>`),
+  ].join("\n    ");
+  const spineItems = [`<itemref idref="title"/>`, ...ch.map((c, i) => `<itemref idref="ch${i+1}"/>`)].join("\n    ");
+  const modified = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+  const opf =
+`<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:identifier id="bookid">${uuid}</dc:identifier>
+    <dc:title>${xesc(title)}</dc:title>
+    <dc:creator>${xesc(author)}</dc:creator>
+    <dc:language>en</dc:language>
+    ${bible.blurb ? `<dc:description>${xesc(bible.blurb)}</dc:description>` : ""}
+    <meta property="dcterms:modified">${modified}</meta>
+  </metadata>
+  <manifest>
+    ${manifestItems}
+  </manifest>
+  <spine>
+    ${spineItems}
+  </spine>
+</package>`;
+
+  const css =
+`body { font-family: Georgia, serif; line-height: 1.6; margin: 5%; }
+h1 { font-weight: normal; text-align: center; margin: 2em 0 1em; }
+p { margin: 0 0 .2em; text-indent: 1.4em; }
+h1 + p { text-indent: 0; }
+.titlepage { text-align: center; margin-top: 25%; }
+.booktitle { font-size: 2em; } .tagline { font-style: italic; margin: 1.5em 0; }
+.byline { margin-top: 3em; } .colophon { margin-top: 4em; font-size: .7em; color: #888; letter-spacing: .1em; }`;
+
+  const container =
+`<?xml version="1.0" encoding="utf-8"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles>
+</container>`;
+
+  // EPUB requires "mimetype" FIRST and STORED (uncompressed).
+  const files = [
+    { name: "mimetype", data: strToU8("application/epub+zip"), store: true },
+    { name: "META-INF/container.xml", data: strToU8(container) },
+    { name: "OEBPS/content.opf", data: strToU8(opf) },
+    { name: "OEBPS/nav.xhtml", data: strToU8(nav) },
+    { name: "OEBPS/title.xhtml", data: strToU8(titlePage) },
+    { name: "OEBPS/style.css", data: strToU8(css) },
+    ...chapterFiles,
+  ];
+
+  const zip = zipStore(files);
+  downloadFile(safeName(".epub"), zip, "application/epub+zip");
+  $("#book-note").textContent = `📚 EPUB exported — ${ch.length} chapter${ch.length===1?"":"s"}. Sideload to Kindle, or upload to KDP / Apple Books / Kobo.`;
+  toast("📚 EPUB built — ready to launch.");
+}
+
+/* ---- minimal STORED-mode ZIP encoder (no compression, valid CRC-32) ---- */
+function strToU8(str) { return new TextEncoder().encode(str); }
+
+const _crcTable = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(u8) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < u8.length; i++) c = _crcTable[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+function zipStore(files) {
+  // Build local records + central directory, STORED (method 0), no data descriptors.
+  const enc = [];              // Uint8Array chunks for the whole archive
+  const central = [];          // central directory records
+  let offset = 0;
+
+  const u16 = n => new Uint8Array([n & 255, (n >>> 8) & 255]);
+  const u32 = n => new Uint8Array([n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]);
+  const push = (arr, chunk) => { arr.push(chunk); return chunk.length; };
+
+  files.forEach(f => {
+    const nameU8 = strToU8(f.name);
+    const crc = crc32(f.data);
+    const size = f.data.length;
+
+    // Local file header
+    const local = [];
+    push(local, u32(0x04034b50));      // local file header sig
+    push(local, u16(20));              // version needed
+    push(local, u16(0));               // flags
+    push(local, u16(0));               // method 0 = stored
+    push(local, u16(0)); push(local, u16(0)); // mod time/date
+    push(local, u32(crc));
+    push(local, u32(size));            // compressed size
+    push(local, u32(size));            // uncompressed size
+    push(local, u16(nameU8.length));
+    push(local, u16(0));               // extra len
+    push(local, nameU8);
+    push(local, f.data);
+    const localBytes = concatU8(local);
+    enc.push(localBytes);
+
+    // Central directory record
+    const cen = [];
+    push(cen, u32(0x02014b50));        // central dir sig
+    push(cen, u16(20)); push(cen, u16(20));   // version made by / needed
+    push(cen, u16(0)); push(cen, u16(0));     // flags / method
+    push(cen, u16(0)); push(cen, u16(0));     // time / date
+    push(cen, u32(crc));
+    push(cen, u32(size)); push(cen, u32(size));
+    push(cen, u16(nameU8.length));
+    push(cen, u16(0)); push(cen, u16(0));     // extra / comment len
+    push(cen, u16(0)); push(cen, u16(0));     // disk / internal attrs
+    push(cen, u32(0));                        // external attrs
+    push(cen, u32(offset));                   // local header offset
+    push(cen, nameU8);
+    central.push(concatU8(cen));
+
+    offset += localBytes.length;
+  });
+
+  const centralBytes = concatU8(central);
+  const eocd = [];
+  const u16b = n => new Uint8Array([n & 255, (n >>> 8) & 255]);
+  const u32b = n => new Uint8Array([n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]);
+  eocd.push(u32b(0x06054b50));           // EOCD sig
+  eocd.push(u16b(0)); eocd.push(u16b(0)); // disk numbers
+  eocd.push(u16b(files.length)); eocd.push(u16b(files.length));
+  eocd.push(u32b(centralBytes.length));
+  eocd.push(u32b(offset));               // central dir offset
+  eocd.push(u16b(0));                    // comment len
+  return concatU8([...enc, centralBytes, concatU8(eocd)]);
+}
+
+function concatU8(chunks) {
+  let len = 0; for (const c of chunks) len += c.length;
+  const out = new Uint8Array(len); let p = 0;
+  for (const c of chunks) { out.set(c, p); p += c.length; }
+  return out;
+}
+function pseudoUUID() {
+  // deterministic-ish unique id without Math.random dependence issues in tests
+  const s = (bible.title || "vyasa") + "|" + (bible.scenes.length) + "|" + Date.now().toString(16);
+  const h = hashStr(s);
+  return `${h}-${h.slice(0,4)}-4${h.slice(0,3)}-8${h.slice(0,3)}-${h}${h.slice(0,4)}`.slice(0, 36);
+}
+
 /* ===================== RULES OF THE ANOMALY ===================== */
 $("#rule-input").addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.value.trim()) {
@@ -2728,6 +3027,7 @@ function hashStr(s){ let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charC
 /* ===================== HYDRATE FROM SAVED STATE ===================== */
 function hydrate() {
   $("#f-title").value = bible.title;
+  if ($("#f-author")) $("#f-author").value = bible.author || "";
   $("#f-logline").value = bible.logline || "";
   $("#f-paradox").value = bible.paradox;
   $("#f-theme").value = bible.theme;

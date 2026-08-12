@@ -445,6 +445,22 @@ silent scan of all your scenes, then shows three things:
 > You don't *have* to pass every check to bind — Vyasa will happily export a draft. The
 > checklist is guidance, not a gate. The Codex is your pitch document and manuscript in one.
 
+### 📚 Publish the Book — launch-ready output
+
+The Codex is the *working* document. **Publish the Book** (also in the Keystone) produces
+the *reader-facing* one — a real, launch-ready book:
+
+1. Enter your **Author name**.
+2. **📚 Export EPUB (.epub)** — a valid EPUB3 with a title page, copyright page, a linked
+   table of contents, and each scene as a chapter (in reader-order). Upload it straight to
+   **Amazon KDP**, Apple Books, or Kobo, or sideload it to a Kindle. This is a genuine
+   ebook file, assembled right in your browser.
+3. **📖 Launch-Ready Book (HTML)** — the same book as a formatted web page (front matter →
+   contents → chapters → "About this book"). Great for **Print → Save as PDF**.
+
+> The book contains only your **prose** (scenes with text), arranged in reader-order —
+> your bible notes, rules, and beats stay behind the scenes where they belong.
+
 ---
 
 ## 11. The Muse
