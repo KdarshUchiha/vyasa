@@ -1,0 +1,308 @@
+{
+  "genre": "thriller",
+  "title": "The Cartographer's Confession",
+  "author": "K. Uchiha",
+  "logline": "A mapmaker discovers that every city she draws becomes real, and the murder she is investigating is one she has not yet drawn.",
+  "paradox": "A cartographer's midnight maps become real and reach backward through time, so the murder she is investigating is a city she has not yet drawn, making her victim, killer, and witness at once.",
+  "theme": "Does making a thing true make you guilty of it?",
+  "unreliable": [
+    "Fractured timeline",
+    "Memory-gapped narrator"
+  ],
+  "rules": [
+    {
+      "id": "id7ef",
+      "text": "A city drawn in the Atlas becomes real",
+      "trigger": "drawing a map",
+      "limit": "only at midnight, when the paper listens"
+    },
+    {
+      "id": "id7f0",
+      "text": "Mara cannot un-draw what already exists",
+      "trigger": "erasing or cutting a page",
+      "limit": "never, a truth cannot be unmade"
+    },
+    {
+      "id": "id7f1",
+      "text": "A believed truth reaches both forward and backward in time",
+      "trigger": "a midnight drawing is completed",
+      "limit": "consequences may precede the cause"
+    }
+  ],
+  "canon": [
+    {
+      "id": "id7f2",
+      "name": "Mara Vance",
+      "type": "character",
+      "facts": [
+        {
+          "id": "id7f3",
+          "text": "left-handed"
+        },
+        {
+          "id": "id7f4",
+          "text": "grey eyes"
+        },
+        {
+          "id": "id7f5",
+          "text": "drags ink instead of pushing it"
+        },
+        {
+          "id": "id7f6",
+          "text": "blacks out at dusk"
+        }
+      ]
+    },
+    {
+      "id": "id7f7",
+      "name": "Detective Kwan",
+      "type": "character",
+      "facts": [
+        {
+          "id": "id7f8",
+          "text": "blue eyes"
+        },
+        {
+          "id": "id7f9",
+          "text": "remembers the loops when others forget"
+        },
+        {
+          "id": "id7fa",
+          "text": "was drawn into being by the Atlas"
+        }
+      ]
+    },
+    {
+      "id": "id7fb",
+      "name": "The Atlas",
+      "type": "object",
+      "facts": [
+        {
+          "id": "id7fc",
+          "text": "opens only for Vance blood"
+        },
+        {
+          "id": "id7fd",
+          "text": "must never be drawn in at midnight"
+        }
+      ]
+    },
+    {
+      "id": "id7fe",
+      "name": "Vance Row",
+      "type": "place",
+      "facts": [
+        {
+          "id": "id7ff",
+          "text": "bears Mara's name"
+        },
+        {
+          "id": "id800",
+          "text": "the street where the body is found"
+        }
+      ]
+    },
+    {
+      "id": "id801",
+      "name": "The net-mender",
+      "type": "character",
+      "facts": [
+        {
+          "id": "id802",
+          "text": "made in an act of kindness Mara did not design"
+        }
+      ]
+    }
+  ],
+  "contradictions": [],
+  "beats": [
+    {
+      "id": "id7d1",
+      "text": "Mara is interrogated over a murder-map she does not remember drawing",
+      "reveal": 2,
+      "chrono": 8
+    },
+    {
+      "id": "id7d3",
+      "text": "Mara inherits the Atlas and its one rule: never draw at midnight",
+      "reveal": 2,
+      "chrono": 0
+    },
+    {
+      "id": "id7d5",
+      "text": "She breaks the rule once; a village she drew becomes real",
+      "reveal": 2,
+      "chrono": 1
+    },
+    {
+      "id": "id7d7",
+      "text": "The seduction of small edits, and the first blackout gaps",
+      "reveal": 1,
+      "chrono": 2
+    },
+    {
+      "id": "id7d9",
+      "text": "She finds a map of the murder scene, in her own hand, unremembered",
+      "reveal": 0,
+      "chrono": 3
+    },
+    {
+      "id": "id7db",
+      "text": "Detective Kwan arrives; the victim's records match Mara as a child",
+      "reveal": 1,
+      "chrono": 4
+    },
+    {
+      "id": "id7dd",
+      "text": "Lost days; the net-mender says 'you always come here, before'",
+      "reveal": 0,
+      "chrono": 5
+    },
+    {
+      "id": "id7df",
+      "text": "The morgue: the victim is Mara, ten years older",
+      "reveal": 1,
+      "chrono": 6
+    },
+    {
+      "id": "id7e1",
+      "text": "She works out causality runs backward: the city caused the drawing",
+      "reveal": 2,
+      "chrono": 7
+    },
+    {
+      "id": "id7e3",
+      "text": "She tries to un-draw it; the second rule forbids it",
+      "reveal": 1,
+      "chrono": 9
+    },
+    {
+      "id": "id7e5",
+      "text": "Kwan confesses he has solved this murder across four vanished cities",
+      "reveal": 2,
+      "chrono": 10
+    },
+    {
+      "id": "id7e7",
+      "text": "Mara sees the loop: victim, killer, witness, and the map are all her",
+      "reveal": 2,
+      "chrono": 11
+    },
+    {
+      "id": "id7e9",
+      "text": "At midnight the gap takes her; she draws the fatal city entire",
+      "reveal": 2,
+      "chrono": 12
+    },
+    {
+      "id": "id7eb",
+      "text": "The confession that opened the book; the loop breathes to begin again",
+      "reveal": 2,
+      "chrono": 13
+    },
+    {
+      "id": "id7ed",
+      "text": "Epilogue: a new grey-eyed girl inherits the Atlas; it is almost midnight",
+      "reveal": 2,
+      "chrono": 14
+    }
+  ],
+  "scenes": [
+    {
+      "id": "id7d2",
+      "title": "The Room With No Windows",
+      "text": "They put me in a room with no windows, which was almost funny. I have spent my life making places where there were none, and now they had made a place with nothing in it but a steel table, two chairs, and a map I did not remember drawing.\n\nDetective Kwan set it between us with the care of a man handling evidence he was afraid of. His eyes were a flat, patient blue, the blue of a sky that has decided nothing good will happen under it.\n\n\"You recognise this,\" he said. Not a question.\n\nI did. Every cartographer knows her own hand the way a mother knows a cry in the dark. The linework was mine, the left-leaning hatch, the pressure that trails off at the end of each stroke because I draw with my left hand and drag the ink instead of pushing it. It was a map of a street I had never walked, in a city that did not exist, with a small careful X where a body would be found.\n\nThe body had been found there yesterday. In a city that, until last week, was only paper.\n\n\"I need you to tell me,\" Kwan said, \"how you drew a murder before it happened.\"\n\nI opened my mouth to say I had not. But that is the trouble with the truth. I was no longer sure it was mine to give.",
+      "beatId": "id7d1"
+    },
+    {
+      "id": "id7d4",
+      "title": "Inheritance",
+      "text": "My grandmother kept a shop that sold nothing. People came anyway.\n\nIt smelled of vellum and old rain, and in the back, under a cloth she never let me lift, was the Atlas. She called it that the way you would name a dog you were afraid of, plainly, so it would not notice you were afraid.\n\n\"It opens for our blood and no other,\" she told me. \"Your mother could not open it. You will.\" She was right, which frightened her more than being wrong ever could have.\n\nThere was one rule. She made me repeat it until it lived in my teeth. Never draw in it at midnight.\n\nI asked her why. She looked at me with my own eyes, grey as pencil lead, and she said, \"Because midnight is when the paper is listening. Draw a thing then and it will hear you. It will believe you. And the world will rearrange its furniture to make the belief true.\"\n\nI thought she was a lonely old woman making her loneliness into a story. She died with ink under her left thumbnail and a page half-finished that I burned without looking at. I have wondered since whether the fire changed anything, or whether burning a map only teaches the world a new way to be on fire.",
+      "beatId": "id7d3"
+    },
+    {
+      "id": "id7d6",
+      "title": "The First City",
+      "text": "I told myself it was a test, which is what we always tell ourselves before the thing we have already decided to do.\n\nI drew a small town. Nothing grand, a fishing village on a coast that had no name because I gave it none. Twelve streets. A harbour like a cupped hand. A lighthouse I drew last, because I liked the way the light would fall.\n\nI did it at 11:58, so that I could tell myself I had not broken the rule, and I finished the lighthouse as the clock turned.\n\nNothing happened. I laughed at myself and went to bed.\n\nIn the morning there was salt on my windowsill and a gull screaming at a sea that had not been there the day before. The village sat at the bottom of my street as if it had always been. The postman delivered to it. The ordinary maps, the ones other people trust, had quietly grown an extra town overnight, and no one but me seemed to notice the world had gotten heavier.\n\nI walked down to the harbour. A woman mending nets nodded at me as though she knew me. \"Cold one,\" she said. I agreed that it was. I did not tell her I had made her three hours ago, or that I could not remember giving her a face, only that she had one now, and it was kind, and that kindness was somehow the most terrifying thing of all.",
+      "beatId": "id7d5"
+    },
+    {
+      "id": "id7d8",
+      "title": "Cartographer's Habit",
+      "text": "Power is not seductive the way they tell you. It does not whisper. It simply makes small things easy, and small things are how a life is spent.\n\nA client wanted a shortcut through the mountains? I drew one. A developer needed a lake with a view? I gave the view a lake to have. I told myself these were improvements. I was tidying the world, the way you straighten a picture on a wall you pass every day.\n\nI never drew at midnight again. I want that on the record. Whatever else I am, I kept the one rule I was given.\n\nAnd still the gaps began.\n\nI would sit down at dusk with a commission and stand up in the dark with my left hand aching and pages filled I did not remember filling. Streets I had no memory of imagining. A clocktower. A row of almshouses. Once, an entire district of a city I had never visited, rendered so precisely that when I finally travelled there, months later, I found it exactly as I had drawn it, and was told it had stood for a hundred years.\n\nI began to keep the Atlas locked. I woke to find it open. I began to sleep with the key around my neck. I woke with ink on my fingers and the key still warm against my chest, and I understood, the way you understand weather, that something was drawing through me at the hour I refused to.",
+      "beatId": "id7d7"
+    },
+    {
+      "id": "id7da",
+      "title": "The Map She Never Drew",
+      "text": "I found it on an ordinary Tuesday, which is when the unbearable prefers to arrive.\n\nI was cataloguing the Atlas, a foolish habit, like counting the teeth of a thing that is counting yours, when the pages fell open to a spread I did not know.\n\nA city. Modern, mine, unmistakably mine: the hatching, the trailing ink, the left-hand drag. Streets I had never designed and yet had clearly designed, because there they were in my own hand. And in the northern quarter, on a street named in my own lettering, Vance Row, my name, my street, a small, careful, deliberate X.\n\nBeside it, in the margin, three words in my grandmother's teaching voice, which is to say in my own: She was here.\n\nI did not know who she was. I told myself I did not know. But my left hand had gone cold, the way it does before it draws something it has not told me about yet, and I closed the Atlas and did not sleep, and in the morning the news carried a story about a body found in a district that had appeared, the papers said, only last week, a district no one remembered commissioning, on a street called Vance Row.",
+      "beatId": "id7d9"
+    },
+    {
+      "id": "id7dc",
+      "title": "Detective Kwan",
+      "text": "He came to the shop three days later, and he already knew the smell of it, which was the first wrong thing.\n\n\"I keep expecting this place to be unfamiliar,\" Kwan said, turning a paperweight over in his hands, \"and it keeps refusing.\" He set it down exactly where it had been. \"Do you ever get that, Ms Vance? The sense you have stood somewhere before, in a life that has not happened yet?\"\n\nI said everyone does. He smiled with his mouth only. His eyes stayed that patient blue.\n\nHe laid out photographs. The body, a woman, face turned away, on the cobbles of Vance Row. He watched my hands, not my face; a clever man, Kwan, he had already understood that a cartographer lies with her face and tells the truth with her hands.\n\nMy left hand did not move. I had trained it, these last three days, the way you train a dog not to go to the door.\n\n\"The street is new,\" he said. \"The victim's fingerprints are not in any system. Her dental records match no living person.\" He leaned in. \"But they match a set on file for a child, forty years ago. A child named Mara Vance. You were that child.\"\n\n\"I am alive,\" I said.\n\n\"Yes,\" he agreed, gently, as though it were the saddest thing he had heard all day. \"That is the part I cannot yet explain.\"",
+      "beatId": "id7db"
+    },
+    {
+      "id": "id7de",
+      "title": "Gaps",
+      "text": "I lost the next two days the way you lose a coin through a hole in a pocket, not all at once, but discovered all at once, when you reach for it and find the lining empty.\n\nI remember locking the shop. I remember the key, warm. Then I remember standing at the harbour of my first small village, the one with the kind net-mender, with no memory of the road there, and salt drying on my face that was not spray, because I had been weeping, and I did not know for whom.\n\nThe net-mender looked at me with something new in her kindness. Pity.\n\n\"You always come here,\" she said, \"before.\"\n\n\"Before what?\"\n\nShe only shook her head and went back to her nets, and I understood that I had had this conversation before, more than once, and that she had learned it was kinder not to answer.\n\nWhen I got home the Atlas was open. Vance Row had grown. There were more streets now than I had found last week, more than I could have drawn in two days, and the X was still there, patient, waiting for me to arrive at it. In the margin, new words in my own hand, wet: You are getting closer. Stop reading and start remembering.",
+      "beatId": "id7dd"
+    },
+    {
+      "id": "id7e0",
+      "title": "The Face on the Slab",
+      "text": "Kwan took me to the morgue because I asked him to, which surprised us both.\n\nThe attendant drew back the sheet the way my grandmother drew back the cloth, plainly, so the dead would not notice they were feared.\n\nIt was my face. Older by perhaps ten years, worn the way a coastline is worn, but mine: the same grey eyes, closed now; the same small scar at the left temple where I had fallen against a drawing table as a girl. The left hand lay uppermost, and there was ink under the thumbnail, dried black, exactly where my grandmother's had been.\n\n\"Cause of death,\" Kwan said quietly, \"was a wound she could not have given herself. And yet the only prints on the pen we found were hers.\" He corrected himself. \"Yours.\"\n\nI looked at my own dead face and felt the vertigo of a mirror that has learned to lie in the other direction, not reflecting what is, but what will be.\n\n\"How can I be here,\" I whispered, \"if I am there?\"\n\nKwan did not answer for a long time. When he did, his voice had lost its patience. \"Because you have not drawn the last city yet. And when you do, it will already have happened. It always has.\"",
+      "beatId": "id7df"
+    },
+    {
+      "id": "id7e2",
+      "title": "Midnight Arithmetic",
+      "text": "I sat with the Atlas and did the arithmetic of my own damnation.\n\nA city drawn becomes real. That was the first truth. It becomes real at midnight, the paper listens then, believes then. That was the second, the one my grandmother had wrapped a rule around like a splint around a break.\n\nBut the body on Vance Row was already real. Already found. Already cold. And Vance Row was in the Atlas in my hand, yet I had not drawn it at midnight. I had not drawn it at all that I could remember.\n\nThere was only one arrangement of the furniture that made the room make sense, and I turned it over until it stood. The drawing had not caused the city. The city had caused the drawing.\n\nSomewhere ahead of me on the loop of my own life, an older Mara would sit at this Atlas at midnight and draw Vance Row entire, and the X, and herself upon it. And that midnight, being heard, being believed, would reach backward as easily as forward, because a thing that is true is true in every direction, and lay its consequences behind it like a wake. The body first. The investigation. This chair. This arithmetic. Me.\n\nI was not remembering my past. I was reading my future in my own handwriting. And the future does not gap. Only the one walking toward it does.",
+      "beatId": "id7e1"
+    },
+    {
+      "id": "id7e4",
+      "title": "Erase",
+      "text": "So I tried to un-draw it.\n\nI want that on the record too, beside the rule I kept. When I understood what I would do, I tried to make it so I could not.\n\nI took the softest eraser and set it to Vance Row and I rubbed until the paper heated under my hand, and the ink did not lift. I took a blade and set it to the page and my hand would not close. I have severed pages from the Atlas before, for clients, without trouble; this page the blade slid off as though the paper were water and the knife a reflection.\n\nMara cannot un-draw what already exists. I heard it in my grandmother's voice and my own, the second rule, the one she never taught me because she did not need to. You cannot unmake a truth by disliking it. You can only tell a louder lie beside it and hope the world mistakes the volume for correction.\n\nI burned the half-finished page once, as a girl. I know now that I did not destroy anything. I taught the world a new way to be on fire, and the fire is still travelling, and it has my face, and it is patient, and it is close.",
+      "beatId": "id7e3"
+    },
+    {
+      "id": "id7e6",
+      "title": "Kwan's Confession",
+      "text": "Kwan found me among the ashes of my own failed erasing, and he did not ask what I had tried to do. He knew. That was the third wrong thing, and the last, because after it there were no more wrong things, only the true one.\n\n\"I have investigated this murder four times,\" he said. He sat without being asked. \"In four cities that no longer exist, because you drew over them. Each time I get a little further before the loop resets. Each time you are a little more certain you are innocent.\" He almost smiled. \"You are, you know. That is the cruelty of it. You are innocent every single time, right up until you are guilty.\"\n\n\"You remember,\" I said. \"The loops. You remember.\"\n\n\"Someone has to. The paper chose you to forget and me to witness. I do not know which is the punishment.\" He looked at his own hands. \"I found the Atlas first, Mara. A long time ago. I drew one city, at midnight, to see if the story was true. And the story was so true that it needed a detective to keep coming to solve it, and so it drew me one, over and over, out of the same ink as you. We are not the author. We are the marginalia.\"",
+      "beatId": "id7e5"
+    },
+    {
+      "id": "id7e8",
+      "title": "The Loop",
+      "text": "Understanding arrived not as a light but as a fit of the room, everything I knew rearranging its furniture at once.\n\nI was the cartographer who drew the city. I was the victim found upon it. I was the witness dragged to the morgue to identify her own face. And I was the confessor who would, at the end, tell the whole of it to a detective made of the same ink as the crime, so that the telling would be believed, and being believed, become true, and being true, reach backward and lay the body on the cobbles before the pen had touched the page.\n\nVictim, killer, witness, and the map that held them. Every point on the loop was me. There was no first cause to find because the loop had no first; a circle does not begin, it only insists.\n\nThe theme of my life, if a life can be said to have one, arranged itself into a single question I could not stop hearing in my grandmother's voice: Does making a thing true make you guilty of it?\n\nI had spent my life answering no. I had tidied the world and called it kindness. I had drawn shortcuts and lakes and a woman mending nets with a kindness I did not design, and I had told myself I was only a hand, only a drag of ink, only the marginalia. But the loop does not care what you tell yourself. It only cares what you draw at midnight.",
+      "beatId": "id7e7"
+    },
+    {
+      "id": "id7ea",
+      "title": "The Drawing of the Fatal City",
+      "text": "I did not decide to do it. That is the confession beneath the confession, and I will make it here where the room has no windows and nothing can get in to argue.\n\nI sat down at dusk, as I had a thousand times, meaning to draw anything else. A garden. A single quiet street with no name and no X. I meant it the way you mean, at the top of the stairs, not to fall.\n\nThe gap took me at 11:58, the hour I had drawn my first small mercy of a village. When it gave me back I was standing, my left hand cramped and black to the wrist, the clock reading twelve-oh-one, and the Atlas open to Vance Row, complete now, entire, every street I had ever half-found joined into one whole city, and in the northern quarter, on the street that bears my name, a small, careful, finished X.\n\nAnd beneath it, in wet ink, in the teaching voice, the last marginal note I would ever leave myself, already drying, already true: She was here. She is here. Go and be found.\n\nThe paper had listened. The paper had believed. Somewhere behind me in time a body was settling onto cold cobbles that had not existed a heartbeat before, wearing my face ten years on, with ink under her left thumbnail, my ink, this ink, the ink still wet on my living hand.\n\nI put on my coat. I walked to Vance Row. I have never in my life been anywhere I had not first drawn, and I did not intend to start with my own death.",
+      "beatId": "id7e9"
+    },
+    {
+      "id": "id7ec",
+      "title": "Confession",
+      "text": "So this is the room with no windows, and this is Detective Kwan with his patient blue eyes, and this is the map between us that I drew before it happened, and this is my confession, which he already knows, because he has heard it four times, in four cities that no longer exist.\n\n\"I drew the city,\" I tell him. \"I drew the street with my name on it. I drew the X. At midnight, when the paper listens. I made it true, and being true it reached backward and laid her on the stones before I lifted the pen.\" I fold my hands so the left cannot betray me, though there is nothing left to betray. \"I made the murder. I am the murder. There is no one to arrest but the ink, and you cannot cuff a truth.\"\n\nKwan writes nothing down. He never does; the marginalia does not keep records, it only accompanies the text.\n\n\"Are you guilty?\" he asks. It is the only question. It is my grandmother's question, wearing his mouth.\n\nI think of the net-mender, and her kindness I did not design. I think of the world made heavier, town by town, truth by truth, by a hand that called itself only a hand.\n\n\"I made it true,\" I say. \"I do not know if that is the same as guilty. I have never known. That is the sentence, Kwan. Not the cell. The not-knowing, forever, at midnight, in my own handwriting.\"\n\nHe nods, and reaches for the map, and I feel the loop draw its breath to begin again, and somewhere a girl is being told a rule she will keep and keep and keep until the one time it keeps her.",
+      "beatId": "id7eb"
+    },
+    {
+      "id": "id7ee",
+      "title": "Epilogue: The Next Cartographer",
+      "text": "The shop sells nothing. People come anyway.\n\nIn the back, under a cloth no one is allowed to lift, the Atlas waits with the patience of a thing that has already won. It opens for our blood and no other. It has a new pair of hands to wait for now, a girl, grey-eyed, left-handed, who does not yet know that the ache in her wrist at dusk is a kind of listening.\n\nHer grandmother tells her the rule and makes her repeat it until it lives in her teeth. Never draw in it at midnight.\n\nThe girl promises. She means it, the way you mean, at the top of the stairs, not to fall.\n\nSomewhere a detective with patient blue eyes buttons his coat against a case he has not yet been drawn into, and does not know why he is sad, and a woman mends nets by a harbour that was made in an act of kindness no one designed, and a map lies folded in an evidence room in a city that will, quite soon, and quite completely, cease to have ever existed.\n\nThe paper is listening. It is almost midnight. It is always almost midnight.",
+      "beatId": "id7ed"
+    }
+  ],
+  "activeScene": "id7d2",
+  "manuscript": "",
+  "blurb": "Mara Vance draws maps, and the maps come true. A village she sketches at the turn of midnight is on the coast by morning, complete with a woman mending nets and a kindness Mara never designed. It is a gift, or a habit, or a hand she cannot quite call her own, until the Atlas falls open to a city she does not remember drawing, on a street that bears her name, with a small careful X where a body will be found. The body is found. Its face is hers, ten years older. And the detective with the patient blue eyes has solved this murder before, in four cities that no longer exist. Some maps are drawn before the territory. Some confessions are written before the crime. What if the truth is only true because you drew it?",
+  "cover": "Abstract and symbolic: a fountain-pen nib bleeding ink downward; the ink resolves into the streets of a city, and the streets in turn resolve into the contour lines of a human face with closed eyes. A single arterial-red X marks one street. Cold slate-greys and midnight blue, one wound of red. No literal figures.",
+  "keywords": "reality-bending, unreliable narrator, temporal paradox, causal loop, literary thriller, metafiction, cosmic dread; comps: Recursion, The City & the City, Inception, Arrival",
+  "coherence": 0
+}
