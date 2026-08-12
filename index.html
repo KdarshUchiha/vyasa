@@ -180,6 +180,23 @@ body::after {
 .synopsis-loading { color: var(--ink-soft); font-style: italic; display: flex; align-items: center; gap: .5rem; }
 .synopsis-loading::before { content: "🌀"; animation: spin 1.4s linear infinite; display: inline-block; }
 
+/* Export to Manuscript block (Phase IV) */
+.export-block { border: 1px solid var(--line); border-radius: 14px; padding: 1.3rem; margin-top: 2rem;
+  background: radial-gradient(600px 300px at 15% -40%, var(--bg-2), var(--panel)); }
+.export-head { display: flex; align-items: flex-start; gap: .8rem; margin-bottom: 1rem; }
+.export-glyph { font-size: 1.6rem; filter: drop-shadow(var(--glow)); }
+.export-title { font-family: var(--font-head); font-size: 1.15rem; letter-spacing: .04em; }
+.export-sub { color: var(--ink-soft); font-size: .82rem; margin-top: .2rem; line-height: 1.4; }
+.export-stats { font-size: .76rem; color: var(--ink-soft); margin-bottom: 1rem; letter-spacing: .04em; }
+.export-stats b { color: var(--accent); }
+.export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.export-opt { display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; text-align: left;
+  padding: .8rem 1rem; background: linear-gradient(90deg, transparent, transparent) var(--bg-2); }
+.export-opt b { font-size: .92rem; }
+.export-opt span { font-size: .72rem; color: var(--ink-soft); font-weight: 400; letter-spacing: .02em; }
+.export-opt:disabled { opacity: .45; }
+@media (max-width: 640px) { .export-grid { grid-template-columns: 1fr; } }
+
 .field { margin-bottom: 1.5rem; }
 .field label { display: block; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-soft); margin-bottom: .5rem; }
@@ -686,6 +703,24 @@ textarea { min-height: 96px; line-height: 1.55; }
         <input type="text" id="f-keywords" placeholder="reality-bending, unreliable narrator, temporal paradox · comps: Inception, Recursion, Annihilation" />
       </div>
       <button class="btn" id="save4">Seal the Labyrinth →</button>
+
+      <!-- EXPORT TO MANUSCRIPT -->
+      <div class="export-block">
+        <div class="export-head">
+          <span class="export-glyph">📖</span>
+          <div>
+            <div class="export-title">Bind the Manuscript</div>
+            <div class="export-sub">Compile your scenes — in reader-order — into a finished document you can read, print, or publish.</div>
+          </div>
+        </div>
+        <div class="export-stats" id="export-stats"></div>
+        <div class="export-grid">
+          <button class="btn ghost export-opt" id="ex-html"><b>📄 Read / Print</b><span>Formatted HTML · print to PDF</span></button>
+          <button class="btn ghost export-opt" id="ex-md"><b>⌨ Markdown</b><span>For Scrivener, Docs, Kindle</span></button>
+          <button class="btn ghost export-opt" id="ex-txt"><b>📝 Plain text</b><span>Universal .txt</span></button>
+          <button class="btn ghost export-opt" id="ex-bible"><b>🗂 Story-Bible Report</b><span>Everything: paradox → prose</span></button>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -911,6 +946,7 @@ $$(".chamber-btn").forEach(btn => {
     $(`.chamber[data-c="${btn.dataset.c}"]`).classList.add("show");
     // The two-track threads need real geometry; redraw when the Map becomes visible.
     if (btn.dataset.c === "2" && mapMode === "tracks") requestAnimationFrame(() => { renderTracks(); });
+    if (btn.dataset.c === "4") renderExportStats();   // refresh word/scene counts on Launch
   });
 });
 
@@ -1645,7 +1681,153 @@ PASSAGE:
 ["f-blurb","f-cover","f-keywords"].forEach(id => {
   $("#"+id).addEventListener("input", e => { bible[id.replace("f-","")] = e.target.value; save(); recompute(); });
 });
-$("#save4").addEventListener("click", () => { toast("Labyrinth sealed. Export your Bible from the rail ⬇"); });
+$("#save4").addEventListener("click", () => { toast("Labyrinth sealed. Bind your manuscript below ↓"); });
+
+/* ============================================================================
+   EXPORT TO MANUSCRIPT — compile scenes (reader-order) into finished documents.
+   Four formats: printable HTML, Markdown, plain text, and a full Bible report.
+   All generated client-side; downloaded as files (HTML opens in a new tab to print).
+   ============================================================================ */
+$("#ex-html").addEventListener("click", () => exportManuscript("html"));
+$("#ex-md").addEventListener("click", () => exportManuscript("md"));
+$("#ex-txt").addEventListener("click", () => exportManuscript("txt"));
+$("#ex-bible").addEventListener("click", () => exportManuscript("bible"));
+
+function manuscriptStats() {
+  const scenes = bible.scenes.filter(s => (s.text || "").trim());
+  const words = scenes.reduce((n, s) => n + s.text.trim().split(/\s+/).length, 0);
+  return { sceneCount: scenes.length, words, mins: Math.max(1, Math.round(words / 230)) };
+}
+function renderExportStats() {
+  const el = $("#export-stats"); if (!el) return;
+  const { sceneCount, words, mins } = manuscriptStats();
+  if (!words) { el.innerHTML = `No prose yet — write scenes at the Desk 🎭, then bind them here.`; return; }
+  el.innerHTML = `<b>${sceneCount}</b> scene${sceneCount===1?"":"s"} · <b>${words.toLocaleString()}</b> words · ~<b>${mins}</b> min read`;
+}
+
+function downloadFile(name, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function safeName(ext) { return (bible.title || "vyasa-manuscript").replace(/[^\w.-]+/g, "_") + ext; }
+
+function exportManuscript(fmt) {
+  const scenes = bible.scenes.filter(s => (s.text || "").trim());
+  if (!scenes.length && fmt !== "bible") { toast("No prose to export yet — write a scene first."); return; }
+  const title = bible.title || "Untitled";
+
+  if (fmt === "txt") {
+    let out = `${title.toUpperCase()}\n\n`;
+    scenes.forEach((s, i) => { out += `\n\n${(s.title || "Scene " + (i+1)).toUpperCase()}\n\n${s.text.trim()}\n`; });
+    downloadFile(safeName(".txt"), out, "text/plain");
+    toast("📝 Plain-text manuscript exported.");
+
+  } else if (fmt === "md") {
+    let out = `# ${title}\n`;
+    if (bible.logline) out += `\n> ${bible.logline}\n`;
+    scenes.forEach((s, i) => { out += `\n\n## ${s.title || "Scene " + (i+1)}\n\n${s.text.trim()}\n`; });
+    downloadFile(safeName(".md"), out, "text/markdown");
+    toast("⌨ Markdown manuscript exported.");
+
+  } else if (fmt === "html") {
+    openPrintableHTML(buildManuscriptHTML(scenes, title));
+    toast("📄 Manuscript opened — use your browser's Print → Save as PDF.");
+
+  } else if (fmt === "bible") {
+    openPrintableHTML(buildBibleReportHTML(scenes, title));
+    toast("🗂 Story-Bible report opened — print or save as PDF.");
+  }
+}
+
+/* Escape for HTML + turn blank-line-separated blocks into <p> paragraphs. */
+function paras(text) {
+  return text.trim().split(/\n\s*\n/).map(p =>
+    `<p>${escapeHtml(p.trim()).replace(/\n/g, "<br>")}</p>`).join("\n");
+}
+
+function manuscriptCSS() {
+  return `
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { font-family: Georgia, "Times New Roman", serif; max-width: 40rem; margin: 0 auto;
+      padding: 4rem 2rem; line-height: 1.7; color: #1a1a1a; background: #fdfcf9; }
+    .title-page { text-align: center; margin: 6rem 0 8rem; page-break-after: always; }
+    .title-page h1 { font-size: 2.8rem; letter-spacing: .04em; margin: 0 0 1rem; font-weight: 400; }
+    .title-page .logline { font-style: italic; color: #555; max-width: 28rem; margin: 1.5rem auto; }
+    .title-page .meta { color: #888; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; margin-top: 3rem; }
+    h2.scene { font-size: 1.5rem; font-weight: 400; margin: 3rem 0 1.5rem; letter-spacing: .02em;
+      page-break-before: always; padding-top: 1rem; }
+    h2.scene:first-of-type { page-break-before: avoid; }
+    p { margin: 0 0 .2rem; text-indent: 1.6em; }
+    p:first-of-type, h2 + p { text-indent: 0; }
+    .sec { border-top: 1px solid #ddd; margin-top: 2.5rem; padding-top: 1.5rem; }
+    .sec h3 { font-size: .8rem; letter-spacing: .18em; text-transform: uppercase; color: #a0522d; }
+    .kv { margin: .3rem 0; } .kv b { color: #333; }
+    ul { padding-left: 1.3rem; } li { margin: .3rem 0; }
+    @media print { body { padding: 0; max-width: none; background: #fff; } a { color: inherit; } }
+    .print-hint { position: fixed; top: 0; left: 0; right: 0; background: #1a1a1a; color: #fff;
+      text-align: center; padding: .6rem; font-family: sans-serif; font-size: .85rem; }
+    @media print { .print-hint { display: none; } }
+  `;
+}
+
+function buildManuscriptHTML(scenes, title) {
+  const body = scenes.map((s, i) =>
+    `<h2 class="scene">${escapeHtml(s.title || "Scene " + (i+1))}</h2>\n${paras(s.text)}`).join("\n");
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>${manuscriptCSS()}</style></head>
+<body>
+  <div class="print-hint">This is your manuscript. Use <b>Ctrl/Cmd+P → Save as PDF</b> to keep it. Close this tab to return to Vyasa.</div>
+  <div class="title-page">
+    <h1>${escapeHtml(title)}</h1>
+    ${bible.logline ? `<div class="logline">${escapeHtml(bible.logline)}</div>` : ""}
+    <div class="meta">${manuscriptStats().words.toLocaleString()} words · built with Vyasa</div>
+  </div>
+  ${body}
+</body></html>`;
+}
+
+function buildBibleReportHTML(scenes, title) {
+  const list = arr => arr && arr.length ? `<ul>${arr.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>` : `<p style="color:#999">—</p>`;
+  const canonHTML = bible.canon.length
+    ? bible.canon.map(e => `<div class="kv"><b>${escapeHtml(e.name)}</b> <i>(${escapeHtml(e.type)})</i>: ${escapeHtml((e.facts||[]).map(f=>f.text).join("; ")) || "—"}</div>`).join("")
+    : `<p style="color:#999">—</p>`;
+  const rulesHTML = bible.rules.length
+    ? `<ul>${bible.rules.map(r => `<li>${escapeHtml(r.text)}${r.trigger?` <i>[trigger: ${escapeHtml(r.trigger)}]</i>`:""}${r.limit?` <i>[limit: ${escapeHtml(r.limit)}]</i>`:""}</li>`).join("")}</ul>`
+    : `<p style="color:#999">—</p>`;
+  const beatsHTML = bible.beats.length
+    ? `<ul>${bible.beats.map(b => `<li>${escapeHtml(b.text)} <i>(${["hidden","hinted","revealed"][b.reveal]})</i></li>`).join("")}</ul>`
+    : `<p style="color:#999">—</p>`;
+  const manuscript = scenes.length
+    ? scenes.map((s,i) => `<h2 class="scene">${escapeHtml(s.title||"Scene "+(i+1))}</h2>\n${paras(s.text)}`).join("\n")
+    : `<p style="color:#999">No scenes written yet.</p>`;
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title)} — Story Bible</title><style>${manuscriptCSS()}</style></head>
+<body>
+  <div class="print-hint">Story-Bible report. <b>Ctrl/Cmd+P → Save as PDF</b> to keep it. Close this tab to return to Vyasa.</div>
+  <div class="title-page">
+    <h1>${escapeHtml(title)}</h1>
+    <div class="meta">Story Bible · ${bible.genre && bible.genre!=="void" ? escapeHtml(bible.genre) : "no genre"} · built with Vyasa</div>
+  </div>
+  <div class="sec"><h3>Central Paradox</h3><p>${escapeHtml(bible.paradox) || "<span style='color:#999'>—</span>"}</p></div>
+  <div class="sec"><h3>Theme</h3><p>${escapeHtml(bible.theme) || "<span style='color:#999'>—</span>"}</p></div>
+  <div class="sec"><h3>Unreliability</h3>${list(bible.unreliable)}</div>
+  <div class="sec"><h3>Rules of the Anomaly</h3>${rulesHTML}</div>
+  <div class="sec"><h3>Canon Ledger</h3>${canonHTML}</div>
+  <div class="sec"><h3>Beats (reader-order)</h3>${beatsHTML}</div>
+  ${bible.blurb ? `<div class="sec"><h3>Blurb</h3><p>${escapeHtml(bible.blurb)}</p></div>` : ""}
+  <div class="sec"><h3>The Manuscript</h3>${manuscript}</div>
+</body></html>`;
+}
+
+/* Open generated HTML in a new tab for reading/printing. Falls back to a file
+   download if the browser blocks the popup. */
+function openPrintableHTML(html) {
+  const w = window.open("", "_blank");
+  if (w && w.document) { w.document.write(html); w.document.close(); }
+  else { downloadFile(safeName(".html"), html, "text/html"); toast("Popup blocked — downloaded the HTML file instead."); }
+}
 
 /* ===================== RULES OF THE ANOMALY ===================== */
 $("#rule-input").addEventListener("keydown", e => {
@@ -2111,7 +2293,7 @@ function hydrate() {
   $("#f-cover").value = bible.cover;
   $("#f-keywords").value = bible.keywords;
   $$("#f-unreliable .chip").forEach(c => c.classList.toggle("on", bible.unreliable.includes(c.dataset.v)));
-  renderMap(); renderScenes(); loadSceneIntoEditor(); renderBible(); renderContradictions(); recompute();
+  renderMap(); renderScenes(); loadSceneIntoEditor(); renderBible(); renderContradictions(); renderExportStats(); recompute();
 }
 
 /* The threshold is ALWAYS the landing page. If a world was chosen in a past

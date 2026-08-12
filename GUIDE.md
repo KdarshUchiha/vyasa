@@ -376,6 +376,25 @@ Once your story exists, this chamber helps you **package** it without spoiling i
 
 The Muse can draft any of these for you from your Story Bible (next section).
 
+### 📖 Bind the Manuscript (export)
+
+At the bottom of Launch, Vyasa can **compile your scenes — in reader-order — into a
+finished document**. It shows your scene count, word count, and reading time, then offers
+four exports:
+
+- **📄 Read / Print** — opens a beautifully formatted manuscript in a new tab (title page,
+  chapter breaks, proper typography). Use your browser's **Print → Save as PDF** to keep it.
+- **⌨ Markdown** — a `.md` file, ideal for pasting into Scrivener, Google Docs, or a Kindle
+  publishing pipeline.
+- **📝 Plain text** — a universal `.txt` of the whole manuscript.
+- **🗂 Story-Bible Report** — one document containing *everything*: paradox, theme, rules,
+  canon, beats, blurb, **and** the full manuscript. Perfect for sharing with a co-writer,
+  editor, or your future self.
+
+> The manuscript is assembled from your **scenes in reader-order** (the right-hand column
+> of the Map / the order in the Desk sidebar) — so the reader experiences it exactly as you
+> arranged. Scenes with no prose are skipped.
+
 ---
 
 ## 11. The Muse
