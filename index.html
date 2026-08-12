@@ -442,6 +442,8 @@ textarea { min-height: 96px; line-height: 1.55; }
   border: 1px solid var(--line); background: transparent; color: var(--ink-soft); transition: all .2s; }
 .contra-card .cbtn:hover { color: var(--ink); border-color: var(--accent); }
 .contra-card .cbtn.designed:hover { border-color: #4ade80; color: #4ade80; }
+.contra-card .cbtn.resolve { border-color: var(--accent); color: var(--accent); }
+.contra-card .cbtn.resolve:hover { background: var(--accent); color: var(--bg); box-shadow: var(--glow); }
 .contra-none { font-size: .84rem; color: var(--ink-soft); padding: .6rem 0; }
 .contra-scene { font-size: .64rem; letter-spacing: .04em; padding: .12rem .5rem; border-radius: 999px;
   border: 1px solid var(--line); color: var(--ink-soft); cursor: pointer; transition: all .2s; }
@@ -1781,13 +1783,22 @@ function detectContradictions(text, scene) {
         const proseHasA = lower.includes(a), proseHasB = lower.includes(b);
         const clash = (factHasA && proseHasB) || (factHasB && proseHasA);
         if (clash) {
-          const proseSide = factHasA ? b : a;
+          const proseSide = factHasA ? b : a;   // the wrong term the prose used
+          const canonSide = factHasA ? a : b;   // what canon says it should be
           out.push({
             sig: `canon:${ent.id}:${a}|${b}`,
             severity: "hard",
             source: "canon",
-            msg: `Canon says ${ent.name || "an entity"} is “${fl.includes(a)?a:b}”, but this passage writes “${proseSide}.”`,
+            msg: `Canon says ${ent.name || "an entity"} is “${canonSide}”, but this passage writes “${proseSide}.”`,
             where: firstSentenceWith(sentences, proseSide),
+            // Resolution data. Prose-fix uses a SAME-FORM antonym so the sentence stays
+            // grammatical ("right hand"→"left hand", not →"left-handed"). Canon-update
+            // rewrites the fact to a same-form opposite too.
+            fix: {
+              proseFrom: proseSide, proseTo: sameFormAntonym(proseSide, OPP) || canonSide,
+              entId: ent.id, factId: fact.id,
+              canonTo: sameFormAntonym(canonSide, OPP) || proseSide,
+            },
           });
         }
       });
@@ -2353,6 +2364,88 @@ function rescanIfLogged() {
   save(); renderContradictions(); renderScenes(); recompute();
 }
 
+/* ===================== RESOLVE A CONTRADICTION ===================== */
+/* A real fix, not just a verdict. For a canon clash we can either correct the
+   PROSE (swap the wrong term to match canon, in the offending scene) or update
+   the CANON fact to match what the prose says. Either way the finding clears on
+   the next scan. "Mark By Design" remains the alternative for intentional breaks. */
+function resolveContradiction(item) {
+  const fix = item.fix;
+  if (!fix || !fix.proseFrom) { toast("This finding has no auto-fix — edit the scene, or Mark By Design."); return; }
+
+  const scene = bible.scenes.find(s => s.id === item.sceneId);
+  const ent = bible.canon.find(e => e.id === fix.entId);
+  const fact = ent && (ent.facts || []).find(f => f.id === fix.factId);
+
+  const choice = prompt(
+    `Resolve this contradiction — type 1 or 2:\n\n` +
+    `  1  Fix the prose — change “${fix.proseFrom}” → “${fix.proseTo}” in ${scene ? `“${scene.title}”` : "the scene"} (match canon)\n` +
+    `  2  Update canon — the prose is right, so rewrite the fact to “${fix.canonTo}”\n\n` +
+    `(Cancel to keep it open. To keep it as an intentional break, use “Mark By Design” instead.)`,
+    "1"
+  );
+  if (choice === null) return;
+
+  if (choice.trim() === "1") {
+    if (!scene) { toast("Couldn't find that scene."); return; }
+    // Replace the wrong term with the SAME-FORM opposite, preserving the case of
+    // each actual match (so "Right hand" → "Left hand", "right hand" → "left hand").
+    const re = new RegExp(escapeRegex(fix.proseFrom), "gi");
+    const before = scene.text;
+    scene.text = scene.text.replace(re, m => matchCase(fix.proseTo, m));
+    if (scene.text === before) { toast(`Couldn't find “${fix.proseFrom}” in the prose — it may have changed. Edit the scene directly.`); return; }
+    item.status = "dismissed";                 // this instance is fixed
+    save();
+    if (bible.activeScene === scene.id) loadSceneIntoEditor();
+    mergeSceneFindings(scene.id, detectContradictions(scene.text, scene));
+    save(); renderContradictions(); renderScenes(); updateSceneMeta(); recompute();
+    toast(`✓ Prose fixed — “${truncate(fix.proseFrom,20)}” → “${truncate(fix.proseTo,20)}”.`);
+
+  } else if (choice.trim() === "2") {
+    if (!fact) { toast("Couldn't find that canon fact — update it in the Ledger."); return; }
+    // Rewrite the fact's term to the same-form opposite (so it matches the prose).
+    const re = new RegExp(escapeRegex(sameFormAntonym(fix.canonTo, OPP_PAIRS) || fix.proseTo), "gi");
+    const rewritten = (fact.text || "").replace(re, fix.canonTo);
+    fact.text = rewritten !== fact.text ? rewritten : fix.canonTo;
+    item.status = "dismissed";
+    save(); renderCanon();
+    bible.scenes.filter(s => s.text.trim()).forEach(s => mergeSceneFindings(s.id, detectContradictions(s.text, s)));
+    save(); renderContradictions(); renderScenes(); updateSceneMeta(); recompute();
+    toast(`✓ Canon updated to “${truncate(fix.canonTo,24)}”.`);
+
+  } else {
+    toast("Type 1 or 2 to resolve, or use Mark By Design.");
+  }
+}
+/* keep replacement casing natural: if the wrong term was Capitalised, capitalise the fix */
+function matchCase(replacement, original) {
+  if (original && original[0] === original[0].toUpperCase() && original[0] !== original[0].toLowerCase())
+    return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+  return replacement;
+}
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+/* Same-form antonym: given a term, find its opposite that shares the SAME grammatical
+   form (both "hand" phrases, or both "-handed"), so substitutions stay grammatical.
+   Uses only pairs where both sides look alike (both contain a shared head word). */
+const OPP_PAIRS = [
+  ["left-handed","right-handed"], ["left hand","right hand"],
+  ["alive","dead"], ["living","dead"], ["awake","asleep"],
+  ["blue eyes","brown eyes"], ["blue eyes","green eyes"], ["brown eyes","green eyes"],
+  ["day","night"], ["silent","loud"], ["young","old"],
+  ["male","female"], ["tall","short"], ["light","dark"],
+  ["remembers","forgets"], ["true","false"], ["real","imagined"],
+];
+function sameFormAntonym(term, pairs) {
+  if (!term) return null;
+  const t = term.toLowerCase();
+  for (const [a, b] of pairs) {
+    if (t === a) return b;
+    if (t === b) return a;
+  }
+  return null;   // no clean same-form opposite (caller falls back)
+}
+
 /* ===================== CONTRADICTION LOG ===================== */
 function renderContradictions() {
   const log = $("#contra-log"); if (!log) return;
@@ -2376,6 +2469,8 @@ function renderContradictions() {
     const sev = c.status === "accepted" ? "by design" : (c.severity === "hard" ? "hard break" : "check");
     const sceneChip = c.sceneTitle
       ? `<span class="contra-scene" data-scene="${c.sceneId}" title="Go to this scene">🎬 ${escapeHtml(truncate(c.sceneTitle, 24))}</span>` : "";
+    // A canon finding can be truly RESOLVED (fix prose or update canon).
+    const canResolve = c.status !== "accepted" && c.fix && c.fix.from && c.fix.to;
     card.innerHTML =
       `<div class="cmsg">${c.source === "muse" ? "✦ " : ""}${escapeHtml(c.msg)}</div>
        ${c.where ? `<div class="muted" style="margin-top:.35rem">“${escapeHtml(truncate(c.where,110))}”</div>` : ""}
@@ -2383,15 +2478,17 @@ function renderContradictions() {
          ${sceneChip}
          <span class="contra-sev">${sev}</span>
          <div class="cbtns">
+           ${canResolve ? `<button class="cbtn resolve" data-act="resolve" title="Fix the prose or update canon">✓ Resolve</button>` : ""}
            ${c.status === "accepted"
               ? `<button class="cbtn" data-act="reopen">Reopen</button>`
-              : `<button class="cbtn designed" data-act="accept" title="This is intentional — the reveal">By Design</button>`}
+              : `<button class="cbtn designed" data-act="accept" title="This is intentional — the reveal">Mark By Design</button>`}
            <button class="cbtn" data-act="dismiss">Dismiss</button>
          </div>
        </div>`;
     card.querySelectorAll(".cbtn").forEach(b => b.addEventListener("click", () => {
       const act = b.dataset.act;
       const item = bible.contradictions.find(x => x.id === c.id); if (!item) return;
+      if (act === "resolve") { resolveContradiction(item); return; }
       if (act === "accept") item.status = "accepted";
       else if (act === "reopen") item.status = "open";
       else if (act === "dismiss") item.status = "dismissed";

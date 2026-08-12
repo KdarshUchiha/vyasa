@@ -358,8 +358,12 @@ found. Each one is a card showing:
   - 🔴 **hard break** — a clear factual contradiction. Almost always a mistake to fix.
   - 🟣 **check** — a possible issue worth a look (e.g. two opposite ideas sitting close together).
 - **A quote** showing where in your text it found the issue.
-- **Two buttons:**
-  - **By Design** — *"This contradiction is intentional — it's my reveal."* The flag
+- **Up to three buttons:**
+  - **✓ Resolve** *(canon breaks only)* — actually **fixes** it. Vyasa offers two choices:
+    **1)** correct the prose (swap the wrong word to match canon — e.g. "right hand" →
+    "left hand", keeping the sentence grammatical), or **2)** update the canon fact (if the
+    prose was right all along). Either way it re-scans and the flag clears.
+  - **Mark By Design** — *"This contradiction is intentional — it's my reveal."* The flag
     turns green and stops counting against you. **This is crucial:** mind-bending stories
     are *full* of deliberate contradictions. Vyasa doesn't assume you're wrong — it asks.
   - **Dismiss** — remove the flag entirely.
