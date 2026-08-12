@@ -197,6 +197,39 @@ body::after {
 .export-opt:disabled { opacity: .45; }
 @media (max-width: 640px) { .export-grid { grid-template-columns: 1fr; } }
 
+/* ---- PHASE 5: THE KEYSTONE ---- */
+.keystone-block { border: 1px solid var(--line); border-radius: 14px; padding: 1.3rem; margin-bottom: 1.4rem;
+  background: radial-gradient(600px 320px at 20% -50%, var(--bg-2), var(--panel)); }
+.keystone-block.verdict { background: radial-gradient(600px 320px at 80% -50%, var(--bg-2), var(--panel)); }
+.ks-head { display: flex; align-items: flex-start; gap: .8rem; margin-bottom: 1rem; }
+.ks-glyph { font-size: 1.6rem; filter: drop-shadow(var(--glow)); }
+.ks-title { font-family: var(--font-head); font-size: 1.15rem; letter-spacing: .04em; }
+.ks-sub { color: var(--ink-soft); font-size: .82rem; margin-top: .2rem; line-height: 1.45; }
+.ks-checklist { display: flex; flex-direction: column; gap: .4rem; }
+.ks-check { display: flex; align-items: center; gap: .6rem; font-size: .88rem; padding: .45rem .6rem;
+  border: 1px solid var(--line); border-radius: 9px; background: var(--bg-2); }
+.ks-check .mark { font-size: 1rem; flex-shrink: 0; }
+.ks-check.ok .mark { color: #4ade80; }
+.ks-check.warn .mark { color: var(--accent-2); }
+.ks-check .ktext { flex: 1; }
+.ks-check .kgoto { font-size: .68rem; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 6px;
+  padding: .15rem .5rem; cursor: pointer; transition: all .2s; }
+.ks-check .kgoto:hover { color: var(--ink); border-color: var(--accent); }
+.ks-check.ok .kgoto { visibility: hidden; }
+
+.ks-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: .7rem; margin-bottom: 1rem; }
+.ks-metric { text-align: center; border: 1px solid var(--line); border-radius: 10px; padding: .7rem .5rem; background: var(--bg-2); }
+.ks-metric .kv { font-family: var(--font-head); font-size: 1.5rem; color: var(--accent); line-height: 1; }
+.ks-metric .kl { font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); margin-top: .35rem; }
+.ks-metric.warn .kv { color: var(--accent-2); }
+.ks-verdict { font-size: .95rem; line-height: 1.6; padding: .9rem 1.1rem; border-radius: 10px; background: var(--bg-2);
+  border-left: 3px solid var(--accent); }
+.ks-verdict.sealed { border-left-color: #4ade80; }
+.ks-verdict.flawed { border-left-color: var(--accent-2); }
+.ks-verdict b { color: var(--accent); }
+.ks-codex-btns { display: flex; gap: .7rem; flex-wrap: wrap; }
+@media (max-width: 640px) { .ks-metrics { grid-template-columns: repeat(2, 1fr); } }
+
 .field { margin-bottom: 1.5rem; }
 .field label { display: block; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-soft); margin-bottom: .5rem; }
@@ -561,6 +594,7 @@ textarea { min-height: 96px; line-height: 1.55; }
     <button class="chamber-btn" data-c="2"><span>🗺️</span><span class="cn">MAP</span></button>
     <button class="chamber-btn" data-c="3"><span>🎭</span><span class="cn">DESK</span></button>
     <button class="chamber-btn" data-c="4"><span>📢</span><span class="cn">LAUNCH</span></button>
+    <button class="chamber-btn" data-c="5"><span>🗝️</span><span class="cn">KEYSTONE</span></button>
     <div class="spacer"></div>
     <a class="mini" href="#" data-guide title="Read the Guide" style="text-decoration:none">❓</a>
     <div class="mini" id="reskin" title="Change world">🎚️</div>
@@ -776,6 +810,44 @@ textarea { min-height: 96px; line-height: 1.55; }
           <button class="btn ghost export-opt" id="ex-md"><b>⌨ Markdown</b><span>For Scrivener, Docs, Kindle</span></button>
           <button class="btn ghost export-opt" id="ex-txt"><b>📝 Plain text</b><span>Universal .txt</span></button>
           <button class="btn ghost export-opt" id="ex-bible"><b>🗂 Story-Bible Report</b><span>Everything: paradox → prose</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 5 — THE KEYSTONE -->
+    <section class="chamber" data-c="5">
+      <div class="eyebrow">Phase V · The Keystone</div>
+      <h2>Lock the Labyrinth</h2>
+      <p class="sub">The last stone in the arch. Vyasa checks every phase, weighs the whole structure, and — when it holds — binds it into one finished Codex: your pitch and your manuscript in a single document.</p>
+
+      <!-- READINESS CHECKLIST -->
+      <div class="keystone-block">
+        <div class="ks-head"><span class="ks-glyph">🗝️</span><div>
+          <div class="ks-title">Readiness</div>
+          <div class="ks-sub">Everything the labyrinth needs to bear weight. Fix the ⚠ items, or seal anyway.</div>
+        </div></div>
+        <div class="ks-checklist" id="ks-checklist"></div>
+      </div>
+
+      <!-- VERDICT -->
+      <div class="keystone-block verdict" id="ks-verdict-block">
+        <div class="ks-head"><span class="ks-glyph">⚖️</span><div>
+          <div class="ks-title">The Verdict</div>
+          <div class="ks-sub">Vyasa's read on the structure as it stands.</div>
+        </div></div>
+        <div class="ks-metrics" id="ks-metrics"></div>
+        <div class="ks-verdict" id="ks-verdict"></div>
+      </div>
+
+      <!-- THE CODEX -->
+      <div class="keystone-block">
+        <div class="ks-head"><span class="ks-glyph">📕</span><div>
+          <div class="ks-title">Bind the Codex</div>
+          <div class="ks-sub">One document: title page → blurb → full Story Bible → the manuscript in reader-order → an appendix (timeline, tension, contradiction ledger).</div>
+        </div></div>
+        <div class="ks-codex-btns">
+          <button class="btn" id="build-codex">📕 Bind the Complete Codex</button>
+          <button class="btn ghost" id="codex-json" title="Everything as a portable .json">⬇ Export Bible (.json)</button>
         </div>
       </div>
     </section>
@@ -1004,6 +1076,7 @@ $$(".chamber-btn").forEach(btn => {
     // The two-track threads need real geometry; redraw when the Map becomes visible.
     if (btn.dataset.c === "2" && mapMode === "tracks") requestAnimationFrame(() => { renderTracks(); });
     if (btn.dataset.c === "4") renderExportStats();   // refresh word/scene counts on Launch
+    if (btn.dataset.c === "5") enterKeystone();       // Phase V: assess + verdict
   });
 });
 
@@ -1967,6 +2040,138 @@ function openPrintableHTML(html) {
   const w = window.open("", "_blank");
   if (w && w.document) { w.document.write(html); w.document.close(); }
   else { downloadFile(safeName(".html"), html, "text/html"); toast("Popup blocked — downloaded the HTML file instead."); }
+}
+
+/* ============================================================================
+   PHASE V — THE KEYSTONE. Reads state from every phase: a readiness checklist,
+   a verdict on the whole structure, and the Codex (bible + manuscript + appendix)
+   in one document. Entering the chamber auto-scans all scenes so nothing slips.
+   ============================================================================ */
+$("#build-codex").addEventListener("click", buildCodex);
+$("#codex-json").addEventListener("click", exportBible);
+
+function enterKeystone() {
+  if (typeof scanAllScenes === "function" && bible.scenes.some(s => (s.text||"").trim())) {
+    // silent full sweep so the verdict reflects reality
+    bible.scenes.filter(s => s.text.trim()).forEach(s => mergeSceneFindings(s.id, detectContradictions(s.text, s)));
+    save();
+  }
+  renderKeystone();
+}
+
+/* readiness rules — each returns {ok, label, goto} */
+function readinessItems() {
+  const enforceable = bible.rules.filter(r => (r.trigger||"").trim() && (r.limit||"").trim()).length;
+  const openContra = bible.contradictions.filter(c => c.status === "open").length;
+  const words = manuscriptStats().words;
+  return [
+    { ok: bible.paradox.trim().length > 20, label: "Central paradox anchored", goto: 1 },
+    { ok: bible.theme.trim().length > 8, label: "Theme defined", goto: 1 },
+    { ok: bible.unreliable.length >= 1, label: "Unreliability chosen", goto: 1 },
+    { ok: bible.rules.length >= 2, label: `Rules of the anomaly (${bible.rules.length}) — ${enforceable} enforceable`, goto: 1 },
+    { ok: bible.canon.length >= 2, label: `Canon entities tracked (${bible.canon.length})`, goto: 1 },
+    { ok: bible.beats.length >= 3, label: `Beats mapped (${bible.beats.length})`, goto: 2 },
+    { ok: bible.beats.some(b => b.reveal !== 0), label: "Non-linear revelation used", goto: 2 },
+    { ok: bible.scenes.some(s => (s.text||"").trim()), label: `Manuscript begun (${words} words)`, goto: 3 },
+    { ok: openContra === 0, label: openContra ? `Resolve ${openContra} open contradiction${openContra>1?"s":""} (or mark By Design)` : "No open contradictions", goto: 3 },
+    { ok: bible.blurb.trim().length > 20, label: "Blurb written", goto: 4 },
+  ];
+}
+
+function renderKeystone() {
+  // checklist
+  const items = readinessItems();
+  const box = $("#ks-checklist"); box.innerHTML = "";
+  items.forEach(it => {
+    const row = document.createElement("div");
+    row.className = "ks-check " + (it.ok ? "ok" : "warn");
+    row.innerHTML =
+      `<span class="mark">${it.ok ? "✓" : "⚠"}</span>
+       <span class="ktext">${escapeHtml(it.label)}</span>
+       <span class="kgoto" data-goto="${it.goto}">fix →</span>`;
+    row.querySelector(".kgoto").addEventListener("click", () => goChamber(it.goto));
+    box.appendChild(row);
+  });
+
+  // metrics
+  const done = items.filter(i => i.ok).length;
+  const tension = computeTension();
+  const words = manuscriptStats().words;
+  const openContra = bible.contradictions.filter(c => c.status === "open").length;
+  const metrics = [
+    { v: bible.coherence + "%", l: "Integrity", warn: bible.coherence < 60 },
+    { v: tension + "%", l: "Reveal Tension", warn: false },
+    { v: words.toLocaleString(), l: "Words", warn: words === 0 },
+    { v: openContra, l: "Open breaks", warn: openContra > 0 },
+  ];
+  $("#ks-metrics").innerHTML = metrics.map(m =>
+    `<div class="ks-metric ${m.warn ? "warn" : ""}"><div class="kv">${m.v}</div><div class="kl">${m.l}</div></div>`).join("");
+
+  // verdict
+  renderVerdict(done, items.length, tension, openContra, words);
+}
+
+function renderVerdict(done, total, tension, openContra, words) {
+  const el = $("#ks-verdict");
+  let cls = "", msg = "";
+  if (!words) {
+    cls = "flawed";
+    msg = "The blueprint exists, but the labyrinth has no walls yet — <b>write some scenes</b> at the Desk before you seal it.";
+  } else if (openContra > 0) {
+    cls = "flawed";
+    msg = `The structure is <b>load-bearing but cracked</b>: ${openContra} unresolved contradiction${openContra>1?"s":""}. Resolve ${openContra>1?"them":"it"} — or mark <b>By Design</b> — so every break is a choice, not an accident.`;
+  } else if (done >= total - 1 && bible.coherence >= 75) {
+    cls = "sealed";
+    msg = `<b>The keystone holds.</b> ${done}/${total} checks passed · ${bible.coherence}% integrity · ${tension}% reveal tension. The reader will be lost; you are not. <b>Ready to bind.</b>`;
+  } else if (bible.coherence >= 55) {
+    cls = "";
+    msg = `<b>Structurally sound, still settling.</b> ${done}/${total} checks · ${bible.coherence}% integrity. Close the ⚠ gaps above to make it airtight — but you can bind a draft now.`;
+  } else {
+    cls = "flawed";
+    msg = `<b>Fragile.</b> ${done}/${total} checks passed. The arch won't bear weight yet — strengthen the ⚠ items, especially the paradox, rules, and canon.`;
+  }
+  el.className = "ks-verdict " + cls;
+  el.innerHTML = msg;
+}
+
+/* THE CODEX — one document: bible report + manuscript + appendix. Reuses the
+   export engine; adds a timeline/tension/contradiction appendix. */
+function buildCodex() {
+  const scenes = bible.scenes.filter(s => (s.text||"").trim());
+  const title = bible.title || "Untitled";
+  const chrono = beatsByChrono();
+  const readerIds = bible.beats.map(b => b.id);
+
+  const timelineRows = bible.beats.length
+    ? bible.beats.map((b, i) => {
+        const cr = chrono.findIndex(x => x.id === b.id);
+        const crossed = cr !== i;
+        return `<tr><td>${i+1}</td><td>${escapeHtml(b.text)}</td><td>${cr+1}</td><td>${["hidden","hinted","revealed"][b.reveal]}</td><td>${crossed ? "↔ diverges" : "—"}</td></tr>`;
+      }).join("")
+    : `<tr><td colspan="5" style="color:#999">No beats mapped.</td></tr>`;
+
+  const live = bible.contradictions.filter(c => c.status !== "dismissed");
+  const ledgerRows = live.length
+    ? live.map(c => `<tr><td>${escapeHtml(c.sceneTitle||"—")}</td><td>${escapeHtml(c.msg)}</td><td>${c.status === "accepted" ? "By Design" : (c.severity === "hard" ? "hard" : "check")}</td></tr>`).join("")
+    : `<tr><td colspan="3" style="color:#999">No contradictions logged — run a scan on the Desk.</td></tr>`;
+
+  const appendix = `
+    <div class="sec"><h3>Appendix · The Two Timelines</h3>
+      <table><thead><tr><th>Reader #</th><th>Beat</th><th>Chrono #</th><th>Reveal</th><th>Gap</th></tr></thead>
+      <tbody>${timelineRows}</tbody></table>
+      <p class="kv"><b>Reveal Tension:</b> ${computeTension()}% &nbsp;·&nbsp; <b>Canon Integrity:</b> ${bible.coherence}%</p>
+    </div>
+    <div class="sec"><h3>Appendix · Contradiction Ledger</h3>
+      <table><thead><tr><th>Scene</th><th>Finding</th><th>Verdict</th></tr></thead>
+      <tbody>${ledgerRows}</tbody></table>
+    </div>`;
+
+  // Reuse the bible-report body, then splice the appendix in before </body>.
+  let html = buildBibleReportHTML(scenes, title);
+  html = html.replace("</body>", appendix + "\n</body>");
+  html = html.replace("— Story Bible", "— The Complete Codex");
+  openPrintableHTML(html);
+  toast("📕 Codex bound — Print → Save as PDF to keep the whole labyrinth.");
 }
 
 /* ===================== RULES OF THE ANOMALY ===================== */

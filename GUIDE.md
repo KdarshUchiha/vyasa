@@ -419,6 +419,30 @@ four exports:
 
 ---
 
+## 10b. Chamber 5 — The Keystone
+
+*(Phase V: Lock the Labyrinth)*
+
+The final chamber (🗝️ in the rail) is where every phase converges. Entering it runs a
+silent scan of all your scenes, then shows three things:
+
+- **Readiness** — a checklist across all four earlier phases (paradox, theme, rules,
+  canon, beats, non-linear reveals, manuscript, open contradictions, blurb). Each ⚠ item
+  has a **fix →** link that jumps you to the right chamber.
+- **The Verdict** — Vyasa's read on the whole structure, with four metrics (Integrity,
+  Reveal Tension, Words, Open breaks) and a one-line judgement: fragile, settling, or
+  *"the keystone holds — ready to bind."*
+- **Bind the Codex** — the payoff. One document containing **everything**: title page →
+  blurb → full Story Bible (paradox, theme, rules, canon, beats) → the manuscript in
+  reader-order → an **appendix** (the two timelines as a table, your reveal-tension and
+  integrity scores, and the contradiction ledger with your *By Design* verdicts). Open it,
+  then **Print → Save as PDF** for the complete labyrinth in one file.
+
+> You don't *have* to pass every check to bind — Vyasa will happily export a draft. The
+> checklist is guidance, not a gate. The Codex is your pitch document and manuscript in one.
+
+---
+
 ## 11. The Muse
 
 *(Optional AI co-writer — bottom of the Story Bible panel)*
