@@ -252,6 +252,28 @@ between chronology and reader-order:
 
 It's a dial for *how lost* your reader is. Tune it to taste.
 
+### 👁 The Reader's Mind (Reader-Knowledge Simulator)
+
+Below the tracks, Vyasa lets you **step through your story as the reader lives it** and see
+the gap between what they *believe* and what's *true but hidden* — the very engine of a
+mind-bending story.
+
+Use the **slider** (or ‹ › buttons) to move to any point in reader-order. At each step:
+
+- **🧠 The reader believes** — everything they've read and understood so far. Beats marked
+  `revealed` appear solid; `hinted` beats show as dashed "clues" they've noticed but can't
+  yet place.
+- **🕳 The truth (hidden from them)** — what's real but the reader *doesn't* grasp yet:
+  beats they've witnessed but marked `hidden`, plus events that (by your chronology) have
+  *already happened* but they haven't reached in reader-order.
+
+The line beneath interprets the gap — flagging **dramatic irony** (when the reader thinks
+they understand but you're withholding a lot) versus moments of **clarity**.
+
+> This updates live as you add beats, flip reveal markers, or drag the timelines. It's the
+> best way to check the reader is confused *exactly where you want* — and oriented where
+> they need to be.
+
 > 💡 Prefer the old simple view? Click **☰ Simple list** at the top of the Map to switch
 > to a single draggable list (reader-order only). **⇋ Two-Track** switches back.
 

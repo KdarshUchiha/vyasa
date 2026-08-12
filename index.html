@@ -280,6 +280,35 @@ textarea { min-height: 96px; line-height: 1.55; }
   cursor: pointer; color: var(--ink-soft); transition: all .2s; }
 .map-mode.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
+/* ---- READER-KNOWLEDGE SIMULATOR ---- */
+.rks { border: 1px solid var(--line); border-radius: 14px; padding: 1.3rem; margin: 1.6rem 0 0;
+  background: radial-gradient(600px 320px at 80% -50%, var(--bg-2), var(--panel)); }
+.rks-head { display: flex; align-items: flex-start; gap: .8rem; margin-bottom: 1rem; }
+.rks-glyph { font-size: 1.6rem; filter: drop-shadow(var(--glow)); }
+.rks-title { font-family: var(--font-head); font-size: 1.15rem; letter-spacing: .04em; }
+.rks-sub { color: var(--ink-soft); font-size: .82rem; margin-top: .2rem; line-height: 1.45; }
+.rks-stepper { display: flex; align-items: center; gap: .8rem; margin: .4rem 0 .3rem; }
+.rks-nav { padding: .3rem .9rem; font-size: 1.2rem; line-height: 1; }
+.rks-slider, #rks-slider { flex: 1; accent-color: var(--accent); }
+.rks-pos { text-align: center; font-size: .78rem; color: var(--accent); letter-spacing: .08em; margin-bottom: 1rem;
+  font-family: var(--font-head); }
+.rks-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.rks-col { border: 1px solid var(--line); border-radius: 10px; padding: .8rem .9rem; background: var(--bg-2); min-height: 90px; }
+.rks-col.believes { border-left: 3px solid var(--accent); }
+.rks-col.truth { border-left: 3px solid var(--accent-2); }
+.rks-col-h { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: .55rem; }
+.rks-col ul { list-style: none; padding: 0; margin: 0; }
+.rks-col li { font-size: .82rem; line-height: 1.4; padding: .35rem .5rem; margin-bottom: .3rem; border-radius: 7px;
+  background: var(--panel); border: 1px solid var(--line); }
+.rks-col li.hint { border-style: dashed; color: var(--ink-soft); }
+.rks-col li .rks-tag { font-size: .58rem; letter-spacing: .06em; text-transform: uppercase; opacity: .7; margin-left: .3rem; }
+.rks-empty { font-size: .78rem; color: var(--ink-soft); font-style: italic; opacity: .6; }
+.rks-irony { margin-top: 1rem; font-size: .84rem; line-height: 1.5; color: var(--ink); border-top: 1px solid var(--line);
+  padding-top: .9rem; }
+.rks-irony b { color: var(--accent); }
+.rks-irony.tense { color: var(--ink); }
+@media (max-width: 640px) { .rks-cols { grid-template-columns: 1fr; } }
+
 /* desk chamber (Phase 3) — now a manuscript of scenes */
 .desk-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 1rem; align-items: start; }
 #manuscript { min-height: 320px; font-size: 1.05rem; line-height: 1.7; }
@@ -641,6 +670,34 @@ textarea { min-height: 96px; line-height: 1.55; }
       <div id="list-view" style="display:none">
         <div class="timeline" id="timeline"></div>
         <p class="muted">Drag to reorder reader-sequence. Each beat's <b>reveal</b> marker = when the reader truly understands it.</p>
+      </div>
+
+      <!-- READER-KNOWLEDGE SIMULATOR -->
+      <div class="rks" id="rks">
+        <div class="rks-head">
+          <span class="rks-glyph">👁</span>
+          <div>
+            <div class="rks-title">The Reader's Mind</div>
+            <div class="rks-sub">Step through your story as the reader lives it — see the gap between what they <em>believe</em> and what's <em>true</em>. That gap is the mind-bend.</div>
+          </div>
+        </div>
+        <div class="rks-stepper">
+          <button class="btn ghost rks-nav" id="rks-prev" title="Previous">‹</button>
+          <input type="range" id="rks-slider" min="0" value="0" />
+          <button class="btn ghost rks-nav" id="rks-next" title="Next">›</button>
+        </div>
+        <div class="rks-pos" id="rks-pos"></div>
+        <div class="rks-cols">
+          <div class="rks-col believes">
+            <div class="rks-col-h">🧠 The reader believes</div>
+            <ul id="rks-believes"></ul>
+          </div>
+          <div class="rks-col truth">
+            <div class="rks-col-h">🕳 The truth (hidden from them)</div>
+            <ul id="rks-truth"></ul>
+          </div>
+        </div>
+        <div class="rks-irony" id="rks-irony"></div>
       </div>
 
       <button class="btn" id="save2" style="margin-top:1rem">Lock the Blueprint →</button>
@@ -1151,6 +1208,7 @@ $$(".map-mode").forEach(m => m.addEventListener("click", () => {
 
 function renderMap() {
   if (mapMode === "tracks") renderTracks(); else renderTimeline();
+  renderRKS();   // the reader's-mind simulator always reflects the latest beats
 }
 
 /* ---- chronology helpers ---- */
@@ -1310,6 +1368,88 @@ function tensionNote(t) {
   if (t < 80) return "Deeply fractured — the labyrinth twists hard.";
   return "Near-total inversion — maximum disorientation. Handle with care.";
 }
+
+/* ============================================================================
+   READER-KNOWLEDGE SIMULATOR — step through reader-order and model, at each
+   step k, the gap between what the reader BELIEVES and what's TRUE but hidden.
+
+   Reading beats 0..k in reader-order:
+     • revealed  → the reader understands it            → BELIEVES (solid)
+     • hinted    → a clue dropped, not yet understood   → BELIEVES (dashed)
+     • hidden    → seen but not grasped                 → TRUTH they hold but can't read
+   Plus: any beat that is chronologically EARLIER than something already read but
+   hasn't itself been reached → a truth that "already happened" off-page → TRUTH.
+   ============================================================================ */
+let rksStep = 0;
+
+/* Pure: compute the reader's mental model at step k (0-based reader position). */
+function readerModel(k) {
+  const reader = bible.beats;                 // reader-order
+  const n = reader.length;
+  if (!n) return { believes: [], truth: [], pos: 0, total: 0 };
+  k = Math.max(0, Math.min(k, n - 1));
+
+  const seen = reader.slice(0, k + 1);        // beats the reader has reached
+  const chronoRankById = {};
+  beatsByChrono().forEach((b, i) => { chronoRankById[b.id] = i; });
+
+  const believes = [], truth = [];
+  seen.forEach(b => {
+    if (b.reveal === 2) believes.push({ text: b.text, tag: "understood", hint: false });
+    else if (b.reveal === 1) believes.push({ text: b.text, tag: "a clue", hint: true });
+    else truth.push({ text: b.text, tag: "witnessed, not understood", hint: false });
+  });
+
+  // Truths that chronologically precede the latest-seen event but the reader
+  // hasn't reached yet in reader-order → dramatic irony / backstory not yet known.
+  const maxChronoSeen = Math.max(...seen.map(b => chronoRankById[b.id] ?? 0));
+  reader.slice(k + 1).forEach(b => {
+    if ((chronoRankById[b.id] ?? 0) < maxChronoSeen) {
+      truth.push({ text: b.text, tag: "already happened, unknown to them", hint: false });
+    }
+  });
+
+  return { believes, truth, pos: k + 1, total: n };
+}
+
+function ironyNote(m) {
+  if (!m.total) return "";
+  const hidden = m.truth.length, known = m.believes.filter(x => !x.hint).length;
+  if (!hidden && m.pos === m.total) return "<b>Full clarity.</b> By the end, the reader understands everything they've seen — a clean resolution.";
+  if (!hidden) return "At this point the reader is <b>oriented</b> — no truths are being withheld yet.";
+  const ratio = hidden / m.total;
+  if (ratio > 0.5) return `<b>Deep dramatic irony:</b> ${hidden} truth${hidden>1?"s are":" is"} hidden from a reader who thinks they understand. This is peak disorientation — make sure it's <em>designed</em>.`;
+  return `The reader carries <b>${hidden}</b> unresolved truth${hidden>1?"s":""} vs. <b>${known}</b> they grasp. The gap between the columns is your mind-bend.`;
+}
+
+function renderRKS() {
+  const wrap = $("#rks"); if (!wrap) return;
+  const n = bible.beats.length;
+  const slider = $("#rks-slider");
+  if (n < 1) {
+    $("#rks-pos").textContent = "Add beats to walk the reader's mind.";
+    $("#rks-believes").innerHTML = `<li class="rks-empty">—</li>`;
+    $("#rks-truth").innerHTML = `<li class="rks-empty">—</li>`;
+    $("#rks-irony").innerHTML = "";
+    slider.max = 0; slider.value = 0;
+    return;
+  }
+  rksStep = Math.max(0, Math.min(rksStep, n - 1));
+  slider.max = n - 1; slider.value = rksStep;
+
+  const m = readerModel(rksStep);
+  const cur = bible.beats[rksStep];
+  $("#rks-pos").textContent = `Reader position ${m.pos} of ${m.total} — just read: “${truncate(cur.text, 60)}”`;
+
+  const li = item => `<li class="${item.hint ? "hint" : ""}">${escapeHtml(item.text)}<span class="rks-tag">${item.tag}</span></li>`;
+  $("#rks-believes").innerHTML = m.believes.length ? m.believes.map(li).join("") : `<li class="rks-empty">Nothing understood yet.</li>`;
+  $("#rks-truth").innerHTML = m.truth.length ? m.truth.map(li).join("") : `<li class="rks-empty">Nothing hidden — the reader is oriented.</li>`;
+  $("#rks-irony").innerHTML = ironyNote(m);
+}
+
+$("#rks-prev").addEventListener("click", () => { rksStep = Math.max(0, rksStep - 1); renderRKS(); });
+$("#rks-next").addEventListener("click", () => { rksStep = Math.min(bible.beats.length - 1, rksStep + 1); renderRKS(); });
+$("#rks-slider").addEventListener("input", e => { rksStep = +e.target.value; renderRKS(); });
 
 /* ---- SIMPLE LIST RENDER (fallback / quick edit) ---- */
 function renderTimeline() {
