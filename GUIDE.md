@@ -265,15 +265,32 @@ Click **"Lock the Blueprint →"** when done. (You can always come back and rear
 
 This is where you **write your actual prose** — and where Vyasa's safety net runs.
 
-There's a large writing area. Type your scene. Below it are three buttons:
+### Your manuscript, scene by scene
 
-- **🧩 Keep the Rules — Scan Passage** → the main check (works offline, instant).
-- **✦ Deep Scan (Muse)** → a deeper check using AI (needs a key — see [section 11](#11-the-muse)).
-- **Save Passage →** → a confirmation (your text is already auto-saved).
+The Desk is split in two:
 
-When you click **Scan**, Vyasa reads your passage and compares it against everything
-in your Story Bible, then fills the **Contradiction Log** below. This is the heart of
-the tool, so it gets its own section 👇
+- **Left — the Scene list.** Click **+ add** to create a scene. Each scene is its own
+  passage (a chapter, a beat, a moment). Click any scene to open it; **drag** scenes to
+  reorder them. A coloured dot means that scene has open contradictions.
+- **Right — the Scene editor.** Give the scene a **title**, optionally **link it to a
+  beat** from your Map (so your outline becomes your draft), and write your prose in the
+  large area. A live **word count** and **scan state** sit beneath it.
+
+*(If you used an earlier version with one big text box, don't worry — your writing was
+automatically moved into "Scene 1." Nothing is lost.)*
+
+### Scanning
+
+Below the editor are the buttons:
+
+- **🧩 Scan this Scene** → the main check on the current scene (works offline, instant).
+- **✦ Deep Scan (Muse)** → a deeper AI check of the current scene (needs a key — see [section 11](#11-the-muse)).
+- **⤢ Scan All Scenes** → runs the offline check across your whole manuscript at once.
+
+When you scan, Vyasa compares the prose against everything in your Story Bible and fills
+the **Contradiction Log** below — and **every finding names the scene it came from.**
+Click the 🎬 scene chip on any finding to jump straight to that scene. This is the heart
+of the tool, so it gets its own section 👇
 
 ---
 

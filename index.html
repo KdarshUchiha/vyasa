@@ -263,10 +263,40 @@ textarea { min-height: 96px; line-height: 1.55; }
   cursor: pointer; color: var(--ink-soft); transition: all .2s; }
 .map-mode.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
-/* desk chamber (Phase 3) */
-.desk-wrap { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+/* desk chamber (Phase 3) — now a manuscript of scenes */
+.desk-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 1rem; align-items: start; }
 #manuscript { min-height: 320px; font-size: 1.05rem; line-height: 1.7; }
 .coherence-readout { display: flex; flex-direction: column; gap: .6rem; }
+
+/* scene sidebar */
+.scene-panel { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden;
+  display: flex; flex-direction: column; max-height: 460px; }
+.scene-panel .sp-head { font-size: .66rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent);
+  padding: .7rem .8rem .5rem; display: flex; align-items: center; }
+.scene-panel .sp-head .sp-add { margin-left: auto; cursor: pointer; border: 1px solid var(--line); border-radius: 6px;
+  padding: .1rem .45rem; color: var(--ink-soft); transition: all .2s; text-transform: none; letter-spacing: .04em; }
+.scene-panel .sp-head .sp-add:hover { color: var(--ink); border-color: var(--accent); }
+.scene-list { overflow-y: auto; padding: .3rem; display: flex; flex-direction: column; gap: .25rem; }
+.scene-item { border: 1px solid transparent; border-radius: 8px; padding: .5rem .6rem; cursor: grab;
+  transition: all .18s; display: flex; align-items: center; gap: .5rem; }
+.scene-item:hover { border-color: var(--line); background: var(--bg-2); }
+.scene-item.active { border-color: var(--accent); background: var(--bg-2); box-shadow: var(--glow); }
+.scene-item.dragging { opacity: .4; }
+.scene-item .sc-num { color: var(--accent); font-family: var(--font-head); font-size: .82rem; min-width: 16px; }
+.scene-item .sc-name { flex: 1; font-size: .82rem; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scene-item .sc-flag { font-size: .62rem; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.scene-item .sc-flag.hard { background: var(--accent-2); }
+.scene-item .sc-flag.soft { background: var(--accent); }
+.scene-item .sc-x { cursor: pointer; color: var(--ink-soft); font-size: .72rem; opacity: 0; transition: opacity .2s; }
+.scene-item:hover .sc-x { opacity: 1; }
+.scene-editor { display: flex; flex-direction: column; gap: .6rem; }
+.scene-titlebar { display: flex; gap: .6rem; align-items: center; }
+.scene-titlebar input.sc-title { font-family: var(--font-head); font-size: 1.05rem; letter-spacing: .02em; }
+.scene-titlebar select { width: auto; font-size: .78rem; padding: .5rem .6rem; flex-shrink: 0; }
+.scene-meta { display: flex; gap: 1rem; font-size: .72rem; color: var(--ink-soft); }
+.scene-meta .sm-scan { margin-left: auto; }
+.scene-meta .sm-scan.hard { color: var(--accent-2); }
+.scene-meta .sm-scan.clean { color: #4ade80; }
 
 /* ===================== RIGHT: STORY BIBLE ===================== */
 .bible { border-left: 1px solid var(--line); background: var(--panel); padding: 1.4rem;
@@ -334,6 +364,9 @@ textarea { min-height: 96px; line-height: 1.55; }
 .contra-card .cbtn:hover { color: var(--ink); border-color: var(--accent); }
 .contra-card .cbtn.designed:hover { border-color: #4ade80; color: #4ade80; }
 .contra-none { font-size: .84rem; color: var(--ink-soft); padding: .6rem 0; }
+.contra-scene { font-size: .64rem; letter-spacing: .04em; padding: .12rem .5rem; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--ink-soft); cursor: pointer; transition: all .2s; }
+.contra-scene:hover { color: var(--ink); border-color: var(--accent); box-shadow: var(--glow); }
 
 /* AI assist panel */
 .assist { margin-top: 1rem; border: 1px dashed var(--line); border-radius: 10px; padding: .8rem; }
@@ -576,21 +609,37 @@ textarea { min-height: 96px; line-height: 1.55; }
     <section class="chamber" data-c="3">
       <div class="eyebrow">Phase III · Crafting the Illusion</div>
       <h2>The Desk of Coherent Incoherence</h2>
-      <p class="sub">Write here. Vyasa watches your prose against the rules you set — so the chaos stays <em>designed</em>. The Coherence meter (right) rises as your text honours your own logic and echoes your paradox.</p>
+      <p class="sub">Your manuscript, scene by scene. Write on the right; the scene list on the left keeps the whole book navigable. Vyasa scans each scene against your rules — so a break points to <em>exactly</em> where it happened.</p>
       <div class="desk-wrap">
-        <textarea id="manuscript" placeholder="Begin the scene. Let the reader feel the reality breaking — but never break your own rules by accident…"></textarea>
+        <!-- SCENE SIDEBAR -->
+        <div class="scene-panel">
+          <div class="sp-head">Scenes <span class="sp-add" id="add-scene">+ add</span></div>
+          <div class="scene-list" id="scene-list"></div>
+        </div>
+        <!-- SCENE EDITOR -->
+        <div class="scene-editor">
+          <div class="scene-titlebar">
+            <input type="text" class="sc-title" id="scene-title" placeholder="Scene title…" />
+            <select id="scene-beat" title="Link this scene to a beat from your Map"></select>
+          </div>
+          <textarea id="manuscript" placeholder="Begin the scene. Let the reader feel the reality breaking — but never break your own rules by accident…"></textarea>
+          <div class="scene-meta">
+            <span id="scene-words">0 words</span>
+            <span class="sm-scan" id="scene-scanstate">not scanned</span>
+          </div>
+        </div>
       </div>
       <div style="display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap">
-        <button class="btn" id="check3">🧩 Keep the Rules — Scan Passage</button>
+        <button class="btn" id="check3">🧩 Scan this Scene</button>
         <button class="btn ghost" id="deep3" title="Uses your Muse key for a real read">✦ Deep Scan (Muse)</button>
-        <button class="btn ghost" id="save3">Save Passage →</button>
+        <button class="btn ghost" id="scanall3" title="Run the offline scan across every scene">⤢ Scan All Scenes</button>
       </div>
 
       <div class="contra-head">
         <h3>Contradiction Log</h3>
         <span class="contra-badge" id="contra-badge">not scanned</span>
       </div>
-      <p class="muted" id="contra-hint">Vyasa checks this passage against your Canon facts, rules of the anomaly, and paradox. Hard breaks are accidents to fix; you can mark any flag <em>By Design</em> — that's the reveal, not a mistake.</p>
+      <p class="muted" id="contra-hint">Vyasa checks each scene against your Canon facts, rules of the anomaly, and paradox. Findings name the scene they came from. Hard breaks are accidents to fix; mark any flag <em>By Design</em> — that's the reveal, not a mistake.</p>
       <div id="contra-log"></div>
       <div id="audit-out" class="assist out" style="margin-top:.6rem"></div>
     </section>
@@ -717,7 +766,9 @@ const LS_KEY = "vyasa.bible.v1";
 const defaultBible = () => ({
   genre: "void", title: "", logline: "", paradox: "", theme: "",
   unreliable: [], rules: [], canon: [], contradictions: [],
-  beats: [], manuscript: "",
+  beats: [],
+  scenes: [], activeScene: null,   // manuscript is now a list of scenes
+  manuscript: "",                  // kept for back-compat / migration only
   blurb: "", cover: "", keywords: "", coherence: 0,
 });
 let bible = load();
@@ -743,6 +794,17 @@ function migrate(b) {
   b.beats = (b.beats || []).map((bt, i) => ({ chrono: typeof bt.chrono === "number" ? bt.chrono : i, ...bt }));
   // ensure chrono exists even when spread above didn't (older objects had no key)
   b.beats.forEach((bt, i) => { if (typeof bt.chrono !== "number") bt.chrono = i; });
+
+  // Manuscript: a single text blob becomes a list of scenes. Fold any legacy
+  // `manuscript` string into "Scene 1" so no writing is ever lost.
+  b.scenes = Array.isArray(b.scenes) ? b.scenes : [];
+  if (!b.scenes.length && (b.manuscript || "").trim()) {
+    b.scenes = [{ id: uid(), title: "Scene 1", text: b.manuscript, beatId: null }];
+  }
+  b.scenes = b.scenes.map(s => ({ id: s.id || uid(), title: s.title || "Untitled scene",
+    text: typeof s.text === "string" ? s.text : "", beatId: s.beatId || null }));
+  if (!b.scenes.some(s => s.id === b.activeScene)) b.activeScene = b.scenes[0] ? b.scenes[0].id : null;
+  b.manuscript = "";   // authoritative store is now `scenes`
   return b;
 }
 function save() { localStorage.setItem(LS_KEY, JSON.stringify(bible)); }
@@ -937,7 +999,8 @@ function buildFromSynopsis() {
   });
   c.beats.forEach(b => {
     if (!bible.beats.some(x => x.text.toLowerCase() === b.text.toLowerCase())) {
-      bible.beats.push({ id: uid(), text: b.text, reveal: b.reveal });
+      const nextChrono = bible.beats.length ? Math.max(...bible.beats.map(x => x.chrono ?? 0)) + 1 : 0;
+      bible.beats.push({ id: uid(), text: b.text, reveal: b.reveal, chrono: nextChrono });
     }
   });
 
@@ -1190,50 +1253,153 @@ function persistBeatOrder() {
 }
 $("#save2").addEventListener("click", () => { toast("Blueprint locked. Revelation ≠ chronology."); goChamber(3); });
 
-/* ===================== PHASE 3 — THE DESK ===================== */
-$("#manuscript").addEventListener("input", e => { bible.manuscript = e.target.value; save(); recompute(); });
-$("#check3").addEventListener("click", () => scanPassage(false));
-$("#deep3").addEventListener("click", () => scanPassage(true));
-$("#save3").addEventListener("click", () => { toast("Passage saved to the Bible."); });
+/* ===================== PHASE 3 — THE DESK (scenes) ===================== */
+/* The manuscript is a list of scenes. One scene is "active" and shown in the
+   editor. Contradiction findings are stamped with their scene, so the log names
+   exactly where a break happened. */
+
+function activeScene() { return bible.scenes.find(s => s.id === bible.activeScene) || null; }
+
+$("#add-scene").addEventListener("click", () => {
+  const s = { id: uid(), title: `Scene ${bible.scenes.length + 1}`, text: "", beatId: null };
+  bible.scenes.push(s); bible.activeScene = s.id;
+  save(); renderScenes(); loadSceneIntoEditor(); recompute();
+  $("#scene-title").focus();
+});
+$("#scene-title").addEventListener("input", e => {
+  const s = activeScene(); if (!s) return;
+  s.title = e.target.value; save(); renderScenes();
+});
+$("#scene-beat").addEventListener("change", e => {
+  const s = activeScene(); if (!s) return;
+  s.beatId = e.target.value || null; save();
+});
+$("#manuscript").addEventListener("input", e => {
+  const s = activeScene(); if (!s) { return; }
+  s.text = e.target.value; save(); updateSceneMeta(); recompute();
+});
+$("#check3").addEventListener("click", () => scanScene(false));
+$("#deep3").addEventListener("click", () => scanScene(true));
+$("#scanall3").addEventListener("click", scanAllScenes);
+
+/* ---- scene sidebar render ---- */
+function renderScenes() {
+  const list = $("#scene-list"); if (!list) return;
+  list.innerHTML = "";
+  if (!bible.scenes.length) {
+    list.innerHTML = `<div class="track-empty" style="margin:.4rem">No scenes yet. Click <b>+ add</b> to begin your manuscript.</div>`;
+    populateBeatSelect(); return;
+  }
+  bible.scenes.forEach((s, i) => {
+    const open = bible.contradictions.filter(c => c.sceneId === s.id && c.status === "open");
+    const worst = open.some(c => c.severity === "hard") ? "hard" : (open.length ? "soft" : "");
+    const el = document.createElement("div");
+    el.className = "scene-item" + (s.id === bible.activeScene ? " active" : "");
+    el.draggable = true; el.dataset.id = s.id;
+    el.innerHTML =
+      `<span class="sc-num">${i + 1}</span>
+       <span class="sc-name">${escapeHtml(s.title || "Untitled")}</span>
+       ${worst ? `<span class="sc-flag ${worst}" title="${open.length} open"></span>` : ""}
+       <span class="sc-x" title="delete scene">✕</span>`;
+    el.addEventListener("click", e => {
+      if (e.target.classList.contains("sc-x")) return;
+      bible.activeScene = s.id; save(); renderScenes(); loadSceneIntoEditor();
+    });
+    el.querySelector(".sc-x").addEventListener("click", () => deleteScene(s.id));
+    list.appendChild(el);
+  });
+  bindSceneDrag();
+  populateBeatSelect();
+}
+
+function deleteScene(id) {
+  const s = bible.scenes.find(x => x.id === id); if (!s) return;
+  if (s.text.trim() && !confirm(`Delete "${s.title}"? Its text will be lost.`)) return;
+  bible.scenes = bible.scenes.filter(x => x.id !== id);
+  // drop that scene's findings
+  bible.contradictions = bible.contradictions.filter(c => c.sceneId !== id);
+  if (bible.activeScene === id) bible.activeScene = bible.scenes[0] ? bible.scenes[0].id : null;
+  save(); renderScenes(); loadSceneIntoEditor(); renderContradictions(); recompute();
+}
+
+function bindSceneDrag() {
+  const list = $("#scene-list"); let dragEl = null;
+  list.querySelectorAll(".scene-item").forEach(el => {
+    el.addEventListener("dragstart", () => { dragEl = el; el.classList.add("dragging"); });
+    el.addEventListener("dragend", () => {
+      el.classList.remove("dragging");
+      const ids = [...list.querySelectorAll(".scene-item")].map(x => x.dataset.id);
+      bible.scenes.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+      save(); renderScenes();
+    });
+    el.addEventListener("dragover", ev => {
+      ev.preventDefault();
+      const after = getSceneAfter(list, ev.clientY);
+      if (after == null) list.appendChild(dragEl); else list.insertBefore(dragEl, after);
+    });
+  });
+}
+function getSceneAfter(container, y) {
+  const els = [...container.querySelectorAll(".scene-item:not(.dragging)")];
+  return els.reduce((closest, child) => {
+    const box = child.getBoundingClientRect(); const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: child };
+    return closest;
+  }, { offset: -Infinity }).element;
+}
+
+/* ---- populate the beat dropdown from the Map ---- */
+function populateBeatSelect() {
+  const sel = $("#scene-beat"); if (!sel) return;
+  const s = activeScene();
+  sel.innerHTML = `<option value="">— link a beat —</option>` +
+    bible.beats.map(b => `<option value="${b.id}">${escapeHtml(truncate(b.text, 40))}</option>`).join("");
+  if (s && s.beatId) sel.value = s.beatId;
+}
+
+/* ---- load the active scene into the editor ---- */
+function loadSceneIntoEditor() {
+  const s = activeScene();
+  const ta = $("#manuscript"), ti = $("#scene-title");
+  if (!s) { ta.value = ""; ti.value = ""; ta.disabled = true; ti.disabled = true; updateSceneMeta(); return; }
+  ta.disabled = false; ti.disabled = false;
+  ti.value = s.title || ""; ta.value = s.text || "";
+  populateBeatSelect(); updateSceneMeta();
+}
+function updateSceneMeta() {
+  const s = activeScene();
+  const words = s && s.text.trim() ? s.text.trim().split(/\s+/).length : 0;
+  $("#scene-words").textContent = `${words} word${words === 1 ? "" : "s"}`;
+  const open = s ? bible.contradictions.filter(c => c.sceneId === s.id && c.status === "open") : [];
+  const state = $("#scene-scanstate");
+  if (!s || !bible.contradictions.some(c => c.sceneId === (s && s.id))) { state.textContent = "not scanned"; state.className = "sm-scan"; }
+  else if (!open.length) { state.textContent = "✓ consistent"; state.className = "sm-scan clean"; }
+  else { state.textContent = `${open.length} open`; state.className = "sm-scan hard"; }
+}
 
 /* ============================================================================
-   THE SPINE — "Vyasa keeps the rules so your reader gets lost, and you never do."
-   scanPassage() runs the deterministic Canon/Rule/Paradox checks. If deep=true
-   and a Muse key is present, it ALSO asks a real model to find contradictions
-   the heuristics can't see, and merges them into the same log.
+   THE SPINE — scan the ACTIVE scene against canon/rules/paradox. Deep=true adds
+   a Muse (real-model) pass. Findings from OTHER scenes are preserved untouched.
    ============================================================================ */
-async function scanPassage(deep) {
-  const raw = bible.manuscript || "";
-  if (!raw.trim()) { $("#audit-out").textContent = "Write a passage first — the desk needs prose to scan."; return; }
+async function scanScene(deep) {
+  const s = activeScene();
+  if (!s || !s.text.trim()) { $("#audit-out").textContent = "This scene has no prose yet — write something to scan."; return; }
 
-  // 1) Deterministic pass — always runs, works offline.
-  const found = detectContradictions(raw);
+  // deterministic pass for THIS scene
+  const found = detectContradictions(s.text, s);
+  mergeSceneFindings(s.id, found);
+  save(); renderContradictions(); renderScenes(); recompute();
+  $("#audit-out").textContent = `Scene "${s.title}" · ` + craftNotes(s.text);
 
-  // 2) Preserve prior human verdicts (accepted / dismissed) across re-scans,
-  //    keyed by a stable signature so the same issue keeps its decision.
-  const prior = new Map(bible.contradictions.map(c => [c.sig, c]));
-  let merged = found.map(f => {
-    const p = prior.get(f.sig);
-    return p ? { ...f, id: p.id, status: p.status } : { ...f, id: uid(), status: "open" };
-  });
-
-  bible.contradictions = merged; save(); renderContradictions(); recompute();
-  $("#audit-out").textContent = craftNotes(raw);
-
-  // 3) Optional deep pass via the Muse (real model reading).
   if (deep) {
     const key = ($("#ai-key").value || "").trim();
     if (!key) { toast("Deep Scan needs your Muse key (right panel)."); return; }
-    $("#contra-hint").textContent = "✦ The Muse is reading your passage against the canon…";
+    $("#contra-hint").textContent = `✦ The Muse is reading "${s.title}" against the canon…`;
     try {
-      const extra = await museContradictions(raw);
+      const extra = await museContradictions(s.text, s);
       const priorNow = new Map(bible.contradictions.map(c => [c.sig, c]));
-      extra.forEach(e => {
-        if (!priorNow.has(e.sig)) {
-          bible.contradictions.push({ id: uid(), status: "open", source: "muse", ...e });
-        }
-      });
-      save(); renderContradictions(); recompute();
+      extra.forEach(e => { if (!priorNow.has(e.sig)) bible.contradictions.push({ id: uid(), status: "open", source: "muse", ...e }); });
+      save(); renderContradictions(); renderScenes(); recompute();
       $("#contra-hint").textContent = "✦ Deep scan complete — Muse findings are marked ✦.";
     } catch (err) {
       $("#contra-hint").textContent = "⚠ Deep scan failed: " + err.message;
@@ -1241,10 +1407,35 @@ async function scanPassage(deep) {
   }
 }
 
+/* Offline scan across EVERY scene at once. */
+function scanAllScenes() {
+  const withText = bible.scenes.filter(s => s.text.trim());
+  if (!withText.length) { $("#audit-out").textContent = "No scenes with prose to scan yet."; return; }
+  withText.forEach(s => mergeSceneFindings(s.id, detectContradictions(s.text, s)));
+  save(); renderContradictions(); renderScenes(); recompute();
+  const open = bible.contradictions.filter(c => c.status === "open").length;
+  $("#audit-out").textContent = `Scanned ${withText.length} scene${withText.length === 1 ? "" : "s"} · ${open} open contradiction${open === 1 ? "" : "s"} across the manuscript.`;
+  toast(`Scanned all ${withText.length} scenes.`);
+}
+
+/* Merge new deterministic findings for one scene, preserving human verdicts and
+   this scene's existing Muse findings; replaces only this scene's heuristic set. */
+function mergeSceneFindings(sceneId, found) {
+  const prior = new Map(bible.contradictions.map(c => [c.sig, c]));
+  const merged = found.map(f => {
+    const p = prior.get(f.sig);
+    return p ? { ...f, id: p.id, status: p.status } : { ...f, id: uid(), status: "open" };
+  });
+  // keep: everything from OTHER scenes, plus THIS scene's Muse findings
+  const keep = bible.contradictions.filter(c => c.sceneId !== sceneId || c.source === "muse");
+  bible.contradictions = keep.concat(merged);
+}
+
 /* ---- Deterministic contradiction detector ----
    Three sources of truth to violate: Canon facts, Rule triggers/limits, Paradox.
-   Every finding gets a STABLE signature so human verdicts survive re-scans. */
-function detectContradictions(text) {
+   Every finding gets a STABLE signature so human verdicts survive re-scans.
+   `scene` (optional {id,title}) stamps each finding so the log names its origin. */
+function detectContradictions(text, scene) {
   const lower = text.toLowerCase();
   const sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
   const out = [];
@@ -1328,7 +1519,11 @@ function detectContradictions(text) {
     }
   });
 
-  return out;
+  // Stamp scene identity: scope each signature to the scene (so the same clash in
+  // two scenes stays distinct) and record the scene id/title for the log.
+  const sid = scene && scene.id ? scene.id : "manuscript";
+  const stitle = scene && scene.title ? scene.title : "";
+  return out.map(f => ({ ...f, sig: `${sid}::${f.sig}`, sceneId: sid, sceneTitle: stitle }));
 }
 
 function craftNotes(text) {
@@ -1344,7 +1539,7 @@ function craftNotes(text) {
 }
 
 /* Ask the Muse to find contradictions the heuristics miss. Returns [{sig,msg,severity,where}]. */
-async function museContradictions(text) {
+async function museContradictions(text, scene) {
   const canonStr = bible.canon.map(e =>
     `${e.name} (${e.type}): ${(e.facts||[]).map(f=>f.text).join("; ")||"—"}`).join("\n") || "(none)";
   const rulesStr = bible.rules.map(r =>
@@ -1365,11 +1560,14 @@ PASSAGE:
   const resp = await callProvider(provider, key, prompt);
   const json = extractJson(resp);
   const issues = (json && json.issues) || [];
+  const sid = scene && scene.id ? scene.id : "manuscript";
+  const stitle = scene && scene.title ? scene.title : "";
   return issues.map(it => ({
-    sig: "muse:" + hashStr((it.quote||"") + (it.problem||"")),
+    sig: `${sid}::muse:` + hashStr((it.quote||"") + (it.problem||"")),
     severity: it.severity === "hard" ? "hard" : "soft",
     msg: `${it.problem||"Possible contradiction."}${it.quote?`  — “${truncate(it.quote,60)}”`:""}`,
     where: it.quote || "",
+    sceneId: sid, sceneTitle: stitle,
   }));
 }
 
@@ -1401,7 +1599,9 @@ function recompute() {
   if (bible.canon.length) score += Math.min(12, bible.canon.length * 3);
   if (bible.beats.length >= 3) score += 8;
   if (bible.beats.some(b => b.reveal !== 0)) score += 5;
-  if (bible.manuscript.trim()) score += 5;
+  const hasProse = bible.scenes.some(s => s.text.trim());
+  if (hasProse) score += 5;
+  if (bible.scenes.length >= 3) score += 3;   // a real manuscript takes shape
 
   // PENALTY: open contradictions erode integrity. Hard breaks hurt most.
   const open = bible.contradictions.filter(c => c.status === "open");
@@ -1547,17 +1747,13 @@ function renderCanon() {
     box.appendChild(el);
   });
 }
-/* If the writer has already scanned, refresh the log when canon changes. */
+/* If the writer has already scanned, refresh the log when canon changes —
+   re-run the deterministic scan across every scene that has prose. */
 function rescanIfLogged() {
-  if (bible.contradictions.length || (bible.manuscript||"").trim()) {
-    const found = detectContradictions(bible.manuscript||"");
-    const prior = new Map(bible.contradictions.map(c => [c.sig, c]));
-    bible.contradictions = found.map(f => {
-      const p = prior.get(f.sig);
-      return p ? { ...f, id: p.id, status: p.status } : { ...f, id: uid(), status: "open" };
-    }).concat(bible.contradictions.filter(c => c.source === "muse")); // keep Muse findings
-    save(); renderContradictions(); recompute();
-  }
+  if (!bible.contradictions.length) return;
+  bible.scenes.filter(s => s.text.trim())
+    .forEach(s => mergeSceneFindings(s.id, detectContradictions(s.text, s)));
+  save(); renderContradictions(); renderScenes(); recompute();
 }
 
 /* ===================== CONTRADICTION LOG ===================== */
@@ -1581,10 +1777,13 @@ function renderContradictions() {
     const card = document.createElement("div");
     card.className = "contra-card " + (c.severity === "hard" ? "" : "soft") + (c.status === "accepted" ? " accepted" : "");
     const sev = c.status === "accepted" ? "by design" : (c.severity === "hard" ? "hard break" : "check");
+    const sceneChip = c.sceneTitle
+      ? `<span class="contra-scene" data-scene="${c.sceneId}" title="Go to this scene">🎬 ${escapeHtml(truncate(c.sceneTitle, 24))}</span>` : "";
     card.innerHTML =
       `<div class="cmsg">${c.source === "muse" ? "✦ " : ""}${escapeHtml(c.msg)}</div>
        ${c.where ? `<div class="muted" style="margin-top:.35rem">“${escapeHtml(truncate(c.where,110))}”</div>` : ""}
        <div class="cmeta">
+         ${sceneChip}
          <span class="contra-sev">${sev}</span>
          <div class="cbtns">
            ${c.status === "accepted"
@@ -1599,8 +1798,17 @@ function renderContradictions() {
       if (act === "accept") item.status = "accepted";
       else if (act === "reopen") item.status = "open";
       else if (act === "dismiss") item.status = "dismissed";
-      save(); renderContradictions(); recompute();
+      save(); renderContradictions(); renderScenes(); updateSceneMeta(); recompute();
     }));
+    // click the scene chip → jump to that scene in the editor
+    const chip = card.querySelector(".contra-scene");
+    if (chip) chip.addEventListener("click", () => {
+      const sid = chip.dataset.scene;
+      if (bible.scenes.some(s => s.id === sid)) {
+        bible.activeScene = sid; save(); renderScenes(); loadSceneIntoEditor();
+        $("#manuscript").scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
     log.appendChild(card);
   });
 }
@@ -1666,12 +1874,11 @@ function hydrate() {
   $("#f-logline").value = bible.logline || "";
   $("#f-paradox").value = bible.paradox;
   $("#f-theme").value = bible.theme;
-  $("#manuscript").value = bible.manuscript;
   $("#f-blurb").value = bible.blurb;
   $("#f-cover").value = bible.cover;
   $("#f-keywords").value = bible.keywords;
   $$("#f-unreliable .chip").forEach(c => c.classList.toggle("on", bible.unreliable.includes(c.dataset.v)));
-  renderMap(); renderBible(); renderContradictions(); recompute();
+  renderMap(); renderScenes(); loadSceneIntoEditor(); renderBible(); renderContradictions(); recompute();
 }
 
 /* The threshold is ALWAYS the landing page. If a world was chosen in a past
