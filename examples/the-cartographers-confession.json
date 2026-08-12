@@ -1,0 +1,135 @@
+{
+  "genre": "thriller",
+  "title": "The Cartographer's Confession",
+  "logline": "A mapmaker discovers that every city she draws becomes real \u2014 and the murder she is investigating is one she has not yet drawn.",
+  "paradox": "A mapmaker discovers that every city she draws becomes real, and the murder she is investigating is one she has not yet drawn.",
+  "theme": "Does creating a truth make you guilty of it?",
+  "unreliable": [
+    "Fractured timeline",
+    "Memory-gapped narrator"
+  ],
+  "rules": [
+    {
+      "id": "id3f3",
+      "text": "A drawn city becomes real",
+      "trigger": "drawing a map",
+      "limit": "only at midnight"
+    },
+    {
+      "id": "id3f4",
+      "text": "Mara cannot un-draw what already exists",
+      "trigger": "erasing",
+      "limit": "never"
+    }
+  ],
+  "canon": [
+    {
+      "id": "id3f5",
+      "name": "Mara Vance",
+      "type": "character",
+      "facts": [
+        {
+          "id": "id3f6",
+          "text": "left-handed"
+        },
+        {
+          "id": "id3f7",
+          "text": "alive"
+        }
+      ]
+    },
+    {
+      "id": "id3f8",
+      "name": "Detective Kwan",
+      "type": "character",
+      "facts": [
+        {
+          "id": "id3f9",
+          "text": "blue eyes"
+        }
+      ]
+    },
+    {
+      "id": "id3fa",
+      "name": "The Atlas",
+      "type": "object",
+      "facts": [
+        {
+          "id": "id3fb",
+          "text": "only Mara can open it"
+        }
+      ]
+    }
+  ],
+  "contradictions": [],
+  "beats": [
+    {
+      "id": "id3e9",
+      "text": "Mara finds a map of a murder scene she never drew",
+      "reveal": 0,
+      "chrono": 3
+    },
+    {
+      "id": "id3ea",
+      "text": "Detective Kwan interrogates Mara about the victim",
+      "reveal": 1,
+      "chrono": 4
+    },
+    {
+      "id": "id3eb",
+      "text": "Mara realizes the victim is her own future self",
+      "reveal": 1,
+      "chrono": 5
+    },
+    {
+      "id": "id3ec",
+      "text": "Flashback: Mara first discovers the Atlas",
+      "reveal": 2,
+      "chrono": 0
+    },
+    {
+      "id": "id3ed",
+      "text": "Mara draws the fatal city at midnight",
+      "reveal": 0,
+      "chrono": 1
+    },
+    {
+      "id": "id3ee",
+      "text": "The confession \u2014 Mara admits she drew it all",
+      "reveal": 2,
+      "chrono": 6
+    },
+    {
+      "id": "id3ef",
+      "text": "The Atlas first bleeds ink on its own",
+      "reveal": 0,
+      "chrono": 2
+    }
+  ],
+  "scenes": [
+    {
+      "id": "id3f0",
+      "title": "Arrival",
+      "text": "Mara Vance signed the register with her right hand, the ink still wet. Detective Kwan fixed her with his brown eyes, missing nothing.\n\nThe precinct smelled of cold coffee and rain. She had drawn this room once, years ago, and here it was \u2014 real, humming, indifferent to her guilt.",
+      "beatId": "id3ea"
+    },
+    {
+      "id": "id3f1",
+      "title": "The Body",
+      "text": "The victim was dead \u2014 and yet Mara, standing over her, was somehow alive and dead at once, the same face on both.\n\nKwan said nothing. He only turned the map toward her, the one she swore she had never drawn, and waited for the confession neither of them had reached yet.",
+      "beatId": "id3eb"
+    },
+    {
+      "id": "id3f2",
+      "title": "Midnight Ink",
+      "text": "At midnight the Atlas opened for her alone. Mara pressed the nib to the empty quarter of the page and, against every promise she had made, began to draw the city where it would happen.",
+      "beatId": "id3ed"
+    }
+  ],
+  "activeScene": "id3f0",
+  "manuscript": "",
+  "blurb": "She draws cities and they breathe. Streets she has never walked remember her. Now there is a map she cannot account for \u2014 a room, a body, a face she knows too well \u2014 and a detective who keeps asking where she was before she was born. Mara Vance has one rule: never draw what she cannot live with. She is about to break it. Some confessions are written before the crime. What if the truth is only true because you drew it?",
+  "cover": "Abstract: a fountain-pen nib bleeding ink that resolves into city streets, which in turn resolve into the lines of a human face. Cold blues and one arterial red. No literal figures.",
+  "keywords": "reality-bending, unreliable narrator, temporal paradox, metafiction \u00b7 comps: Recursion, Inception, The City & the City",
+  "coherence": 0
+}
