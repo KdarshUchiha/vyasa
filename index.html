@@ -230,6 +230,32 @@ body::after {
 .ks-codex-btns { display: flex; gap: .7rem; flex-wrap: wrap; }
 @media (max-width: 640px) { .ks-metrics { grid-template-columns: repeat(2, 1fr); } }
 
+/* ---- THE CHORUS (voice consistency) ---- */
+.chorus-bar { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
+.voice-card { border: 1px solid var(--line); border-radius: 14px; padding: 1.1rem 1.2rem; margin-bottom: 1rem;
+  background: radial-gradient(500px 260px at 12% -60%, var(--bg-2), var(--panel)); }
+.voice-head { display: flex; align-items: center; gap: .7rem; margin-bottom: .5rem; }
+.voice-name { font-family: var(--font-head); font-size: 1.15rem; letter-spacing: .03em; }
+.voice-count { margin-left: auto; font-size: .72rem; color: var(--ink-soft); border: 1px solid var(--line);
+  border-radius: 999px; padding: .15rem .6rem; }
+.voice-count.flag { color: var(--accent-2); border-color: var(--accent-2); }
+.voice-profile { display: block; width: 100%; background: var(--bg-2); border: 1px solid var(--line); color: var(--ink);
+  border-radius: 9px; padding: .55rem .7rem; font-family: var(--font-body); font-size: .84rem; margin-bottom: .7rem; resize: vertical; min-height: 44px; }
+.voice-profile:focus { outline: none; border-color: var(--accent); box-shadow: var(--glow); }
+.voice-profile::placeholder { color: var(--ink-soft); opacity: .7; font-style: italic; }
+.voice-lines { list-style: none; padding: 0; margin: 0; max-height: 240px; overflow-y: auto; }
+.voice-lines li { font-size: .86rem; line-height: 1.45; padding: .4rem .6rem; margin-bottom: .35rem; border-radius: 8px;
+  background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent); color: var(--ink); }
+.voice-lines li.off { border-left-color: var(--accent-2); }
+.voice-lines li .vl-scene { display: block; font-size: .64rem; color: var(--ink-soft); letter-spacing: .06em;
+  text-transform: uppercase; margin-top: .25rem; }
+.voice-empty { font-size: .8rem; color: var(--ink-soft); font-style: italic; opacity: .65; }
+.chorus-none { font-size: .84rem; color: var(--ink-soft); font-style: italic; opacity: .65; padding: .8rem 0; }
+.voice-muse { margin-top: .7rem; display: flex; gap: .5rem; flex-wrap: wrap; }
+.voice-muse .btn { font-size: .74rem; padding: .35rem .7rem; }
+.voice-muse-out { font-size: .84rem; line-height: 1.5; color: var(--ink); white-space: pre-wrap; margin-top: .5rem;
+  padding: .5rem .7rem; background: var(--bg-2); border: 1px dashed var(--line); border-radius: 8px; display: none; }
+
 .field { margin-bottom: 1.5rem; }
 .field label { display: block; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-soft); margin-bottom: .5rem; }
@@ -595,6 +621,7 @@ textarea { min-height: 96px; line-height: 1.55; }
     <button class="chamber-btn active" data-c="1"><span>🌀</span><span class="cn">GENESIS</span></button>
     <button class="chamber-btn" data-c="2"><span>🗺️</span><span class="cn">MAP</span></button>
     <button class="chamber-btn" data-c="3"><span>🎭</span><span class="cn">DESK</span></button>
+    <button class="chamber-btn" data-c="6"><span>🗣️</span><span class="cn">CHORUS</span></button>
     <button class="chamber-btn" data-c="4"><span>📢</span><span class="cn">LAUNCH</span></button>
     <button class="chamber-btn" data-c="5"><span>🗝️</span><span class="cn">KEYSTONE</span></button>
     <div class="spacer"></div>
@@ -870,6 +897,21 @@ textarea { min-height: 96px; line-height: 1.55; }
         <div class="muted" id="book-note" style="margin-top:.6rem"></div>
       </div>
     </section>
+
+    <!-- CHORUS — voice consistency -->
+    <section class="chamber" data-c="6">
+      <div class="eyebrow">The Chorus · Voices of the Labyrinth</div>
+      <h2>The Chorus</h2>
+      <p class="sub">Give each character a <em>voice</em>, and Vyasa collects every line they speak across your scenes — so you can hear whether they sound like one person, and catch when two voices blur (a real risk when identities fold into each other).</p>
+
+      <div class="chorus-bar">
+        <button class="btn" id="chorus-scan">🗣️ Gather the Voices</button>
+        <button class="btn ghost" id="chorus-voicecheck" title="Flag off-voice & indistinct lines into the Contradiction Log">🎚️ Check Voice Consistency</button>
+        <span class="muted" id="chorus-note">Add characters in the Canon Ledger (right), give them voice traits, then gather.</span>
+      </div>
+
+      <div id="chorus-list"></div>
+    </section>
   </main>
 
   <!-- RIGHT: STORY BIBLE -->
@@ -1096,6 +1138,7 @@ $$(".chamber-btn").forEach(btn => {
     if (btn.dataset.c === "2" && mapMode === "tracks") requestAnimationFrame(() => { renderTracks(); });
     if (btn.dataset.c === "4") renderExportStats();   // refresh word/scene counts on Launch
     if (btn.dataset.c === "5") enterKeystone();       // Phase V: assess + verdict
+    if (btn.dataset.c === "6") renderChorus();        // The Chorus: voices
   });
 });
 
@@ -2487,6 +2530,213 @@ function pseudoUUID() {
   return `${h}-${h.slice(0,4)}-4${h.slice(0,3)}-8${h.slice(0,3)}-${h}${h.slice(0,4)}`.slice(0, 36);
 }
 
+/* ============================================================================
+   THE CHORUS — voice consistency. Each canon CHARACTER can carry a `voice`
+   profile string. Vyasa extracts quoted dialogue from scenes and attributes each
+   line to the nearest named speaker, so you can read a character's lines together
+   and (optionally) flag lines that break their voice or blur with another's.
+   Extraction is heuristic — honest about that in the UI.
+   ============================================================================ */
+$("#chorus-scan").addEventListener("click", () => { renderChorus(true); });
+$("#chorus-voicecheck").addEventListener("click", runVoiceCheck);
+
+function characters() { return bible.canon.filter(e => e.type === "character"); }
+
+/* Pull quoted spans and attribute each to a character by the nearest name mention
+   within a short window before/after the quote. Returns { entId: [{quote, scene}] }. */
+function extractDialogue() {
+  const chars = characters();
+  const byChar = {}; chars.forEach(c => byChar[c.id] = []);
+  if (!chars.length) return byChar;
+
+  // build a name → entId lookup (first name too, so "Kwan" matches "Detective Kwan")
+  const nameHits = [];
+  chars.forEach(c => {
+    const full = (c.name || "").trim(); if (!full) return;
+    nameHits.push({ id: c.id, name: full });
+    const parts = full.split(/\s+/);
+    if (parts.length > 1) parts.forEach(p => { if (p.length >= 3) nameHits.push({ id: c.id, name: p }); });
+  });
+
+  bible.scenes.forEach(scene => {
+    const text = scene.text || ""; if (!text.trim()) return;
+    // match “curly” or "straight" quotes
+    const re = /[“"]([^“”"]{2,400}?)[”"]/g;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const quote = m[1].trim();
+      if (!quote || quote.split(/\s+/).length < 2) continue;   // skip one-word quotes
+      const start = m.index, end = re.lastIndex;
+      // window: 60 chars before the open-quote and 60 after the close-quote
+      const before = text.slice(Math.max(0, start - 60), start).toLowerCase();
+      const after = text.slice(end, end + 60).toLowerCase();
+      const ctx = before + " ||| " + after;
+      // choose the nearest name mention in that context
+      let best = null, bestDist = 1e9;
+      nameHits.forEach(h => {
+        const idx = ctx.indexOf(h.name.toLowerCase());
+        if (idx < 0) return;
+        // distance from the quote boundary (the ||| marker sits at 'before.length+1')
+        const dist = Math.abs(idx - (before.length + 2));
+        if (dist < bestDist) { bestDist = dist; best = h.id; }
+      });
+      if (best) byChar[best].push({ quote, scene: scene.title || "Untitled" });
+    }
+  });
+  return byChar;
+}
+
+let _chorusData = null;
+function renderChorus(scan) {
+  const box = $("#chorus-list"); if (!box) return;
+  const chars = characters();
+  const note = $("#chorus-note");
+
+  if (!chars.length) {
+    box.innerHTML = `<div class="chorus-none">No characters yet. In the <b>Canon Ledger</b> (right panel), add an entity and set its type to <b>character</b> — then come back and Gather the Voices.</div>`;
+    return;
+  }
+  if (scan || !_chorusData) _chorusData = extractDialogue();
+  const data = _chorusData;
+  const total = Object.values(data).reduce((n, a) => n + a.length, 0);
+  if (note) note.textContent = total
+    ? `Gathered ${total} line${total===1?"":"s"} across ${chars.length} character${chars.length===1?"":"s"}. Attribution is heuristic — unattributed back-and-forth may be missed.`
+    : "No attributed dialogue found yet. Write quoted lines near a character's name at the Desk.";
+
+  box.innerHTML = "";
+  chars.forEach(c => {
+    const lines = data[c.id] || [];
+    const flagged = (bible.contradictions || []).filter(x => x.source === "voice" && x.charId === c.id && x.status === "open").length;
+    const card = document.createElement("div"); card.className = "voice-card"; card.dataset.id = c.id;
+    card.innerHTML =
+      `<div class="voice-head">
+         <span class="voice-name">🗣️ ${escapeHtml(c.name)}</span>
+         <span class="voice-count ${flagged?"flag":""}">${lines.length} line${lines.length===1?"":"s"}${flagged?` · ${flagged} ⚠`:""}</span>
+       </div>
+       <textarea class="voice-profile" placeholder="Voice profile — how do they speak? e.g. 'clipped, never uses contractions, answers a question with a question; cold and precise.'">${escapeHtml(c.voice || "")}</textarea>
+       <ul class="voice-lines"></ul>
+       <div class="voice-muse">
+         <button class="btn ghost vm-line" title="Write a new line in this voice (needs Muse key)">✦ Write a line in this voice</button>
+       </div>
+       <div class="voice-muse-out"></div>`;
+    // profile editing
+    const prof = card.querySelector(".voice-profile");
+    prof.addEventListener("input", e => { c.voice = e.target.value; save(); });
+    // lines
+    const ul = card.querySelector(".voice-lines");
+    if (!lines.length) ul.innerHTML = `<li class="voice-empty">No lines attributed yet.</li>`;
+    else lines.forEach(l => {
+      const off = (bible.contradictions||[]).some(x => x.source === "voice" && x.charId === c.id && x.quote === l.quote && x.status !== "dismissed");
+      const li = document.createElement("li");
+      if (off) li.className = "off";
+      li.innerHTML = `“${escapeHtml(l.quote)}”<span class="vl-scene">${escapeHtml(l.scene)}</span>`;
+      ul.appendChild(li);
+    });
+    // Muse: write a line in voice
+    const out = card.querySelector(".voice-muse-out");
+    card.querySelector(".vm-line").addEventListener("click", () => museVoiceLine(c, out));
+    box.appendChild(card);
+  });
+}
+
+/* Voice check → deterministic heuristics, folded into the Contradiction Log as
+   source:"voice". Two checks:
+   (1) OFF-VOICE: profile says "no contractions"/"never swears"/etc. and a line breaks it.
+   (2) INDISTINCT: two characters share a large fraction of identical lines/very similar
+       style — a blur risk. (Kept conservative to avoid noise.) */
+function runVoiceCheck() {
+  const chars = characters();
+  if (!chars.length) { toast("Add character entities in the Canon Ledger first."); return; }
+  const data = _chorusData || (_chorusData = extractDialogue());
+
+  // clear prior open voice findings; keep human verdicts on matching sig
+  const prior = new Map((bible.contradictions||[]).filter(c=>c.source==="voice").map(c => [c.sig, c]));
+  const kept = (bible.contradictions||[]).filter(c => c.source !== "voice");
+  const found = [];
+
+  chars.forEach(c => {
+    const prof = (c.voice || "").toLowerCase();
+    (data[c.id] || []).forEach(l => {
+      const q = l.quote;
+      // rule: "no contractions" / "never uses contractions" → flag apostrophe-contractions
+      if (/\bno contraction|without contraction|never use[s]? contraction|doesn't use contraction|does not use contraction/.test(prof)) {
+        if (/\b\w+['’](t|s|re|ve|ll|d|m)\b/i.test(q)) {
+          found.push(voiceFinding(c, l, `${c.name}'s voice avoids contractions, but this line uses one.`));
+        }
+      }
+      // rule: "never swears" / "no profanity"
+      if (/\bnever swear|no profanit|doesn't swear|does not swear|no cursing/.test(prof)) {
+        if (/\b(damn|hell|bastard|bloody|shit|christ)\b/i.test(q)) {
+          found.push(voiceFinding(c, l, `${c.name}'s voice is stated as never swearing, but this line does.`));
+        }
+      }
+      // rule: "formal" / "no slang" → flag casual contractions of "going to"/"want to"
+      if (/\bformal\b|no slang|never casual|archaic|victorian/.test(prof)) {
+        if (/\b(gonna|wanna|gotta|kinda|yeah|nah|ain't)\b/i.test(q)) {
+          found.push(voiceFinding(c, l, `${c.name}'s voice is formal/archaic, but this line uses slang.`));
+        }
+      }
+    });
+  });
+
+  // INDISTINCT: any two characters sharing an identical line (>=3 words) verbatim.
+  const seen = {};
+  chars.forEach(c => (data[c.id]||[]).forEach(l => {
+    if (l.quote.split(/\s+/).length < 3) return;
+    const key = l.quote.toLowerCase().replace(/[^a-z0-9 ]/g,"").trim();
+    (seen[key] = seen[key] || []).push({ c, l });
+  }));
+  Object.values(seen).forEach(arr => {
+    const distinct = [...new Set(arr.map(x => x.c.id))];
+    if (distinct.length > 1) {
+      const names = distinct.map(id => chars.find(c=>c.id===id).name).join(" & ");
+      const { c, l } = arr[0];
+      found.push({ ...voiceFinding(c, l, `Indistinct voices: ${names} share a near-identical line — make them sound like different people (or is the blur intentional?).`), severity: "soft" });
+    }
+  });
+
+  // merge, preserving verdicts
+  const merged = found.map(f => {
+    const p = prior.get(f.sig);
+    return p ? { ...f, id: p.id, status: p.status } : { ...f, id: uid(), status: "open" };
+  });
+  bible.contradictions = kept.concat(merged);
+  save(); renderChorus(); renderContradictions(); recompute();
+  $("#chorus-note").textContent = merged.length
+    ? `Voice check: ${merged.length} flag${merged.length===1?"":"s"} sent to the Contradiction Log (Desk 🎭). Resolve or Mark By Design there.`
+    : "Voice check: every line sits within its character's voice. The chorus holds.";
+  toast(merged.length ? `🎚️ ${merged.length} voice flag${merged.length===1?"":"s"}.` : "🎚️ Voices consistent.");
+}
+
+function voiceFinding(c, l, msg) {
+  return {
+    sig: `voice:${c.id}:${hashStr(l.quote)}`,
+    severity: "soft", source: "voice",
+    charId: c.id, quote: l.quote,
+    msg, where: l.quote,
+    sceneId: null, sceneTitle: l.scene,
+  };
+}
+
+async function museVoiceLine(c, outEl) {
+  const key = ($("#ai-key").value || "").trim();
+  if (!key) { toast("Writing in-voice needs your Muse key (Story Bible → The Muse)."); return; }
+  const samples = (( _chorusData && _chorusData[c.id]) || []).slice(0, 6).map(l => `- “${l.quote}”`).join("\n") || "(no lines yet)";
+  const prompt =
+`You are Vyasa. Write ONE new line of dialogue in the established voice of the character below — return only the line, in double quotes, nothing else.
+
+CHARACTER: ${c.name}
+VOICE PROFILE: ${c.voice || "(none given — infer from the samples)"}
+SAMPLE LINES:
+${samples}
+STORY PARADOX: ${bible.paradox || "(none)"}`;
+  outEl.style.display = "block"; outEl.textContent = "The Muse is finding the voice…";
+  try {
+    const text = await callProvider($("#ai-provider").value, key, prompt);
+    outEl.textContent = text.trim();
+  } catch (err) { outEl.textContent = "⚠ " + err.message; }
+}
+
 /* ===================== RULES OF THE ANOMALY ===================== */
 $("#rule-input").addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.value.trim()) {
@@ -2769,8 +3019,10 @@ function renderContradictions() {
     const card = document.createElement("div");
     card.className = "contra-card " + (c.severity === "hard" ? "" : "soft") + (c.status === "accepted" ? " accepted" : "");
     const sev = c.status === "accepted" ? "by design" : (c.severity === "hard" ? "hard break" : "check");
-    const sceneChip = c.sceneTitle
-      ? `<span class="contra-scene" data-scene="${c.sceneId}" title="Go to this scene">🎬 ${escapeHtml(truncate(c.sceneTitle, 24))}</span>` : "";
+    const sceneChip = c.source === "voice"
+      ? `<span class="contra-scene" title="Voice finding — see The Chorus">🗣️ ${escapeHtml(truncate(c.sceneTitle || "voice", 24))}</span>`
+      : (c.sceneTitle
+        ? `<span class="contra-scene" data-scene="${c.sceneId}" title="Go to this scene">🎬 ${escapeHtml(truncate(c.sceneTitle, 24))}</span>` : "");
     // A canon finding can be truly RESOLVED (fix prose or update canon).
     const canResolve = c.status !== "accepted" && c.fix && c.fix.from && c.fix.to;
     card.innerHTML =

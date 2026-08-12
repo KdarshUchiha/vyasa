@@ -463,6 +463,37 @@ the *reader-facing* one — a real, launch-ready book:
 
 ---
 
+## 10c. The Chorus — voice consistency
+
+*(Reached from 🗣️ in the left rail.)*
+
+Mind-bending stories live or die on **voice** — it's how a reader tells who's who when
+identities fold together, narrators lie, or two characters are secretly one. The Chorus
+helps you keep each character sounding like themselves.
+
+1. In the **Canon Ledger** (right panel), add your people as entities of type **character**.
+2. Open the Chorus and click **🗣️ Gather the Voices**. Vyasa scans your scenes, finds
+   quoted dialogue, and attributes each line to the nearest named speaker — so you can read
+   **all of one character's lines together** and hear whether they're one consistent person.
+3. Give each character a **voice profile** (e.g. *"clipped, never uses contractions, answers
+   a question with a question"*). It's saved with your Bible.
+4. Click **🎚️ Check Voice Consistency** to flag:
+   - **Off-voice lines** — a line that breaks the character's stated profile (uses a
+     contraction when they never do, slang when they're formal, etc.).
+   - **Indistinct voices** — two characters sharing a near-identical line, i.e. they're
+     starting to sound the same (unless that blur is your intention — then Mark By Design).
+
+   Findings land in the **Contradiction Log** on the Desk (tagged 🗣️), where you Resolve or
+   Mark By Design like any other flag.
+5. With a **Muse key**, **✦ Write a line in this voice** drafts a new line in the character's
+   established style, learning from their existing lines.
+
+> ⚠️ **Honest limitation:** attribution is heuristic. It reliably catches lines near a
+> speaker's name ("*Kwan said, '…'*") but can miss long unattributed back-and-forth. Treat
+> the gathered lines as a strong sample, not a perfect transcript.
+
+---
+
 ## 11. The Muse
 
 *(Optional AI co-writer — bottom of the Story Bible panel)*
